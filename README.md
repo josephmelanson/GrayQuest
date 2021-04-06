@@ -10,6 +10,8 @@ This is version 0.9.
 A Java IDE is currently required to run GrayQuest.
 
 ## Gameplay
+The premise of GrayQuest is that one of the characters relatives has fallen ill, and the character must search all the biomes of the land to find the mythical "Glass Produce" needed to cure them. An elaboration of this premise will be featured in the game in version 1.0.
+
 Players are prompted to name or load a character. Characters begin in town, where they can chose from some town specific options or leave to the world map. Players can search on the world map, with a chance to find loot, monsters, or dungeons (bosses).
 
 Players have the option to attack, flee, or use a potion on every combat round. If the play wins, there is a chance the defeated monster will an item potion. If the player has defeated enough monsters to level up, they will be notified of this and instructed to rest to town and rest to level up.
