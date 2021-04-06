@@ -7,7 +7,7 @@ The rules that govern combat in GrayQuest are based on the Wizards of the Coast 
 This is version 0.9.
 
 ## Installation and Usage
-A Java IDE is currently required to run GrayQuest.
+A Java IDE is required to run GrayQuest. Choose to run 'GrayQuest.java' and follow the onscreen prompts to start the game.
 
 ## Premise
 The premise of GrayQuest is that one of the characters relatives has fallen ill, and the character must search all the biomes of the land to find the mythical "Glass Produce" needed to cure them. An elaboration of this premise will be featured in the game in version 1.0.
