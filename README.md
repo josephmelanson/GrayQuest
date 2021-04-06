@@ -19,6 +19,8 @@ Players have the option to attack, flee, or use a potion on every combat round. 
 
 If a player defeates the bosses in each of the world dungeons (frozen north, tropical south, eastern mountains, western shores, central plains) they will be prompted to enter the Tower upon return to town, where they will face the final boss.
 
+Check the screenshots folder for images of key gameplay features.
+
 ## Updates/Improvements
 Version 1.0 will feature the implimentation of story text. Future versions may address changes to the character save/load system.
 
