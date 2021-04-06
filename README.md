@@ -1,7 +1,7 @@
 # GrayQuest
 GrayQuest game is a text-based adventure game written in Java. GrayQuest is the latest (April 2021) iteration of a project intended as a learning tool that makes learning new programming languages, and their structures, more relatable to someone with interest in game design and mechanics.
 
-The rules that govern combat in GrayQuest are based on the Wizards of the Coast Dungeons & Dragons 5.1 Open Gaming License (https://dnd.wizards.com/articles/features/systems-reference-document-srd), but have been modified and streamlined to create a simplier game experience, and facilitate ease of coding.
+The rules that govern combat in GrayQuest are based on the Wizards of the Coast Dungeons & Dragons 5.1 Open Gaming License (https://dnd.wizards.com/articles/features/systems-reference-document-srd), but have been modified to create a simplier game experience and facilitate ease of coding.
 
 ## Version
 This is version 0.9.
