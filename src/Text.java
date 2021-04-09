@@ -5,7 +5,7 @@ public class Text {
 
     // MEMBER VARIABLES:
     // This ArrayList holds gossip spoken to player on returning to down. This is also where hint gossip is displayed.
-    private final ArrayList<String> townText = new ArrayList<>(Arrays.asList("Welcome back.", "Back again?", "Haven't I seen you here before?"));
+    private final ArrayList<String> townText = new ArrayList<>(Arrays.asList("Welcome back.", "Back again?", "Haven't I seen you here before?", "You're looking stronger."));
     // This ArrayList contains description of loot containers on the world map.
     private final ArrayList<String> moneyDesc = new ArrayList<>(Arrays.asList("in a rotten boot", "in a hallow tree-stump", "in a small coin-purse", "in a large coin-purse", "in an old back-pack", "in a small treasure chest", "in a large treasure chest", "in a broken musical instrument", "in a smelly hat", "in a broken wagon", "in a hole in the ground", "in a small cave", "behind a large rock", "under some bushes", "under a broken shield", "in a series of increasingly smaller containers", "in a dirty rug", "in an old barrel", "in the ashes of a campfire", "hidden in a tree", "on a dead Goblin", "on a dead traveler", "in a foot-print the size of a large house", "a large circular burned out patch", "sitting under a broken trap", "on a stained altar", "among some ruins", "in a pile of muck"));
     // This ArrayList contains the descriptions for each level of the final dungeon/boss fights.
