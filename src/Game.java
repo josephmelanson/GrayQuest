@@ -1,3 +1,4 @@
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -45,47 +46,57 @@ public class Game {
     // This method handles character loading and creation.
     private void preGame() {
         player.newCharacter(); // this resets character data in the event of a soft reload
+        File f = new File("savedata.txt");
+        char c;
+        if (f.exists()) {
+            System.out.print("Will you Load a game or start a New one? (l/n): ");
+            c = cleanChar();
+            while (c != 'l' && c != 'n') {
+                System.out.print("\nYou must Load a game or start a New one. (l/n): ");
+                c = cleanChar();
+            }
+            if (c == 'l') {
+                System.out.print("\n-----LOAD-----\n");
+                readLoadData();
+                player.setSecondaryStats();
+                player.getCharacterSummary();
+            } else {
+                characterCreation();
+            }
+        } else characterCreation();
+    }
+
+    private void characterCreation() {
         Scanner s = new Scanner(System.in);
-        System.out.print("Will you Load a game or start a New one? (l/n): ");
+        System.out.print("\nEnter your character's name: ");
+        String characterName = s.next();
+        player.setName(characterName);
+        System.out.print(text.getRacePrompt());
         char c = cleanChar();
-        while (c != 'l' && c != 'n') {
-            System.out.print("\nYou must Load a game or start a New one. (l/n): ");
+        while (c != 'h' && c != 'o' && c != 'd' && c != 'e') {
+            System.out.print("\nYou must choose Human, Orc, Dwarf or Elf. (h/o/d/e): ");
             c = cleanChar();
         }
-        if (c == 'l') {
-            System.out.print("\n-----LOAD-----\n");
-            readLoadData();
-            player.setSecondaryStats();
-            player.getCharacterSummary();
+        if (c == 'h') {
+            player.setRace(1);
+        } else if (c == 'o') {
+            player.setRace(2);
+        } else if (c == 'd') {
+            player.setRace(3);
         } else {
-            System.out.print("\nEnter your character's name: ");
-            String characterName = s.next();
-            player.setName(characterName);
-            System.out.print(text.getRacePrompt());
+            player.setRace(4);
+        }
+        boolean statLoop = true;
+        while (statLoop) {
+            player.setMainStats();
+            player.printPlayerStats();
+            System.out.print("\n\nThese are your stats. Accept? (y/n): ");
             c = cleanChar();
-            while (c != 'h' && c != 'o' && c != 'd' && c != 'e') {
-                System.out.print("\nYou must choose Human, Orc, Dwarf or Elf. (h/o/d/e): ");
+            while (c != 'n' && c != 'y') {
+                System.out.print("\n\nYou must choose Yes to accept or No to re-roll. (y/n): ");
                 c = cleanChar();
             }
-            if (c == 'h') {
-                player.setRace(1);
-            } else if (c == 'o') {
-                player.setRace(2);
-            } else if (c == 'd') {
-                player.setRace(3);
-            } else { player.setRace(4); }
-            boolean statLoop = true;
-            while (statLoop) {
-                player.setMainStats();
-                player.printPlayerStats();
-                System.out.print("\n\nThese are your stats. Accept? (y/n): ");
-                c = cleanChar();
-                while (c != 'n' && c != 'y') {
-                    System.out.print("\n\nYou must choose Yes to accept or No to re-roll. (y/n): ");
-                    c = cleanChar();
-                }
-                statLoop = c != 'y';
-            }
+            statLoop = c != 'y';
         }
     }
 
@@ -825,7 +836,6 @@ public class Game {
     private boolean potionCheck() { return player.getTotalPotions() >= 1; }
     // These display potion option to the player during combat and map.
     private void potionUseMenu() {
-        // variables
         int i;
         char c;
         boolean potionLoop = true;
@@ -871,28 +881,22 @@ public class Game {
         }
     }
     private void displayPotions() {
-        String options = "or Exit? (";
+        String options = "\nor Exit? (";
         if (player.getHealPotionsOne() > 0) {
-            System.out.print("\nHealing Potions (2d4+2): " + player.getHealPotionsOne() + ".\n");
-            options += "h";
+            System.out.print("\nHealing Potions (2d4+2): " + player.getHealPotionsOne() + "\n");
+            options += "h/";
         }
         if (player.getHealPotionsTwo() > 0) {
-            System.out.print("\nGreater Healing Potions (4d4+4): " + player.getHealPotionsTwo() + ".\n");
-            if (player.getHealPotionsOne() > 0) {
-                options += "/g/";
-            } else options += "g/";
+            System.out.print("\nGreater Healing Potions (4d4+4): " + player.getHealPotionsTwo() + "\n");
+            options += "g/";
         }
         if (player.getHealPotionsThree() > 0) {
-            System.out.print("\nSuperior Healing Potion (8d4+8): " + player.getHealPotionsThree() + ".\n");
-            if (player.getHealPotionsOne() > 0 || player.getHealPotionsTwo() > 0) {
-                options += "/s/";
-            } else options += "s/";
+            System.out.print("\nSuperior Healing Potion (8d4+8): " + player.getHealPotionsThree() + "\n");
+            options += "s/";
         }
         if (player.getHealPotionsFour() > 0) {
-            System.out.print("Very Supreme Healing Potion ()" + player.getHealPotionsFour() + ".\n");
-            if (player.getHealPotionsOne() > 0 || player.getHealPotionsTwo() > 0 || player.getHealPotionsThree() > 0) {
-                options += "/v/";
-            } else options += "v/";
+            System.out.print("\nVery Supreme Healing Potion (10d4+10)" + player.getHealPotionsFour() + "\n");
+            options += "v/";
         }
         options += "e): ";
         System.out.print(options);

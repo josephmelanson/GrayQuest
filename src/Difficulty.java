@@ -5,7 +5,7 @@ public class Difficulty {
         private final int xpForLevel = 2; // Monsters required for level up = xpForLevel * playerLevel.
         private final int dungeonChance = 5; // 1=100%, 2=50%, 3=33%, 4=25%, etc.
         private final int monsterChance = 2; // 1=100%, 2=50%, 3=33%, 4=25%, etc.
-        private final int playerBaseHP = 100; // 10 is D&D standard, 100 is debugging.
+        private final int playerBaseHP = 10; // 10 is D&D standard, 100 is debugging.
         private final int runChance = 2; // 1=100%, 2=50%, 3=33%, 4=25%, etc.
 
         private final int commonPrice = 10;

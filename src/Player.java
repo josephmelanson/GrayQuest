@@ -52,48 +52,8 @@ public class Player extends Monster {
     private boolean towerOneClear;
     private boolean towerTwoClear;
 
-    // DEFAULT CONSTRUCTOR
-    public Player() {
-        level = 1; // value > 1 is debug
-        experience = 0; // value > 0 is debug
-        money = 0; // value > 0 is debug
-        posX = 0;
-        posY = 0;
-        posZ = 0;
-
-        hpBase = difficulty.getPlayerBaseHP();
-
-        equippedArmor = 1.0;
-        equippedShield = 3.0;
-        equippedSword = 2.0;
-
-        weaponMin = 1;
-        weaponMax = 8;
-        shieldBaseAC = 2;
-        armorBaseAC = 18;
-
-        shieldBonus = 0;
-        armorBonus = 0;
-        weaponBonus = 0;
-
-        healPotionsOne = 0;
-        healPotionsTwo = 0;
-        healPotionsThree = 0;
-        healPotionsFour = 0;
-        totalPotions = 0;
-
-        plainsDungeonClear = false;
-        coldDungeonClear = false;
-        mountainDungeonClear = false;
-        shoresDungeonClear = false;
-        tropicalDungeonClear = false;
-
-        towerOneClear = false;
-        towerTwoClear = false;
-    }
-
     // ZERO-ARG CONSTRUCTOR
-    // This is used to reset character data on a soft reload.
+    // This is used instead of a default constructor to reset character data on a soft reload.
     public void newCharacter() {
         level = 1; // value > 1 is debug
         experience = 0; // value > 0 is debug
