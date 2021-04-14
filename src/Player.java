@@ -52,7 +52,7 @@ public class Player extends Monster {
     private boolean towerOneClear;
     private boolean towerTwoClear;
 
-    // ZERO-ARG CONSTRUCTOR
+    // METHODS:
     // This is used instead of a default constructor to reset character data on a soft reload.
     public void newCharacter() {
         level = 1; // value > 1 is debug
