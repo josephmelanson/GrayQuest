@@ -15,7 +15,7 @@ The premise of GrayQuest is that one of the characters relatives has fallen ill,
 ## Gameplay
 Players are prompted to name or load a character. Characters begin in town, where they can chose from some town specific options or leave to the world map. Players can search on the world map, with a chance to find loot, monsters, or dungeons (bosses).
 
-Players have the option to attack, flee, or use a potion on every combat round. If the play wins, there is a chance the defeated monster will an item potion. If the player has defeated enough monsters to level up, they will be notified of this and instructed to rest to town and rest to level up.
+Players have the option to attack, flee, or use a potion on every combat round. If the play wins, there is a chance the defeated monster will drop an item. If the player has defeated enough monsters to level up, they will be notified of this and instructed to rest to town and rest to level up.
 
 If a player defeates the bosses in each of the world dungeons (frozen north, tropical south, eastern mountains, western shores, central plains) they will be prompted to enter the Tower upon return to town, where they will face the final boss.
 
