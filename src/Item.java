@@ -30,6 +30,7 @@ public class Item {
             return " +5";
         } else return null;
     }
+
     public String getItemName(double itemID) {
         String name;
         String bonus = null;
@@ -51,6 +52,19 @@ public class Item {
             return name + bonus;
         }
     }
+
+    public int getItemTypeNumber(double itemID) {
+        return (int)itemID;
+    }
+
+    public double getItemBonusNumber(double itemID) {
+        int i = (int)itemID;
+        double d = itemID - i;
+        d = Math.round(d * 10);
+        d = d / 10;
+        return d;
+    }
+
     public String getPotionName(double itemID) {
         // itemID processing block
         int i = (int)itemID;
@@ -67,6 +81,22 @@ public class Item {
         } else {
             return "Healing Potion";
         }
+    }
+
+    public int getItemPrice(double itemID) {
+        int i = getItemTypeNumber(itemID);
+        double d = getItemBonusNumber(itemID);
+        if (d == 0.1) {
+            return difficulty.getCommonPrice();
+        } else if (d == 0.2) {
+            return difficulty.getUncommonPrice();
+        } else if (d == 0.3) {
+            return difficulty.getRarePrice();
+        } else if (d == 0.4) {
+            return difficulty.getVRarePrice();
+        } else if (d == 0.5) {
+            return difficulty.getLegendaryPrice();
+        } else return 0;
     }
 
     // OTHER METHODS

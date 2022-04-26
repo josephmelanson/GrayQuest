@@ -1,30 +1,18 @@
 public class Difficulty {
-
-        // DIFFICULTY OPTIONS
-        private final int maxLevel = 20; // Maximum level players can achieve.
-        private final int xpForLevel = 2; // Monsters required for level up = xpForLevel * playerLevel.
-        private final int dungeonChance = 5; // 1=100%, 2=50%, 3=33%, 4=25%, etc.
-        private final int monsterChance = 2; // 1=100%, 2=50%, 3=33%, 4=25%, etc.
-        private final int playerBaseHP = 10; // 10 is D&D standard, 100 is debugging.
-        private final int runChance = 2; // 1=100%, 2=50%, 3=33%, 4=25%, etc.
-
-        private final int commonPrice = 10;
-        private final int uncommonPrice = 50;
-        private final int rarePrice = 100;
-        private final int vRarePrice = 200;
-        private final int legendaryPrice = 500;
-
+        // DIFFICULTY OPTIONS\
         // GETTERS
-        public int getMaxLevel() { return maxLevel; }
-        public int getXpForLevel(int lvl) { return xpForLevel * lvl; }
-        public int getDungeonChance() { return dungeonChance; }
-        public int getMonsterChance() { return monsterChance; }
-        public int getPlayerBaseHP() { return playerBaseHP; }
-        public int getRunChance() { return runChance; }
+        public int getMaxLevel() { return 20; } // Maximum level players can achieve.
+        public int getXpForLevel(int lvl) { // Monsters required for level up = xpForLevel * playerLevel.
+                int xpForLevel = 2;
+                return xpForLevel * lvl; }
+        public int getDungeonChance() { return 5; } // 1=100%, 2=50%, 3=33%, 4=25%, etc.
+        public int getMonsterChance() { return 2; } // 1=100%, 2=50%, 3=33%, 4=25%, etc.
+        public int getPlayerBaseHP() { return 10; } // 10 is D&D standard, 100 is debugging.
+        public int getRunChance() { return 2; } // 1=100%, 2=50%, 3=33%, 4=25%, etc.
 
-        public int getCommonPrice() { return commonPrice; }
-        public int getUncommonPrice() { return uncommonPrice; }
-        public int getRarePrice() { return rarePrice; }
-        public int getVRarePrice() { return vRarePrice; }
-        public int getLegendaryPrice() { return legendaryPrice; }
+        public int getCommonPrice() { return 10; }
+        public int getUncommonPrice() { return 50; }
+        public int getRarePrice() { return 100; }
+        public int getVRarePrice() { return 200; }
+        public int getLegendaryPrice() { return 500; }
 }

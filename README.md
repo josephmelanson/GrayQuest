@@ -4,28 +4,28 @@ GrayQuest game is a text-based adventure game written in Java. GrayQuest is the 
 The rules that govern combat in GrayQuest are based on the Wizards of the Coast Dungeons & Dragons 5.1 Open Gaming License (https://dnd.wizards.com/articles/features/systems-reference-document-srd), but have been modified to create a simplier game experience and facilitate ease of coding.
 
 ## Version
-This is version 0.9.
+This is version 1.0.
 
 ## Installation and Usage
-A Java IDE is required to run GrayQuest. Run 'GrayQuest.java' and follow the onscreen prompts to start the game.
+A Java IDE is required to run GrayQuest. Run 'Main.java' and follow the onscreen prompts to start the game. Future released will include an executable jar.
 
 ## Premise
 The premise of GrayQuest is that one of the characters relatives has fallen ill, and the character must search all the biomes of the land to find the mythical "Glass Produce" needed to cure them. An elaboration of this premise will be featured in the game in version 1.0.
 
 ## Gameplay
-Players are prompted to name or load a character. Characters begin in town, where they can chose from some town specific options or leave to the world map. Players can search on the world map, with a chance to find loot, monsters, or dungeons (bosses).
+Players are prompted to name or load a character. Characters begin in town, where they can choose from some town specific options or leave to the world map. Players can search on the world map, with a chance to find loot, monsters, or dungeons (bosses).
 
 Players have the option to attack, flee, or use a potion on every combat round. If the play wins, there is a chance the defeated monster will drop an item. If the player has defeated enough monsters to level up, they will be notified of this and instructed to rest to town and rest to level up.
 
-If a player defeates the bosses in each of the world dungeons (frozen north, tropical south, eastern mountains, western shores, central plains) they will be prompted to enter the Tower upon return to town, where they will face the final boss.
+If a player defeats the bosses in each of the world dungeons (frozen north, tropical south, eastern mountains, western shores, central plains) they will be prompted to enter the Tower upon return to town, where they will face the final boss.
 
 Check the screenshots folder for images of key gameplay features.
 
 ## Updates/Improvements
-Version 1.0 will feature the implimentation of story text. Future versions may address changes to the character save/load system.
+Version 1.0 will feature the implementation of story text. Future versions may address changes to the character save/load system.
 
 ## Contributing
-Feedback is very welcome. I'm primarly concerned with bugs and logical and syntaxual errors in the code.
+Feedback is very welcome. I'm primarily concerned with bugs and logical and errors in the code.
 
 ## License
 I need to learn more about licenses, and which one would be most appropriate for a project of this scope. Feedback welcomed.

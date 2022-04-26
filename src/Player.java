@@ -3,7 +3,6 @@ import java.util.*;
 public class Player extends Monster {
 
     // OBJECTS
-    Place worldMap = new Place(); // Used to access map boundaries.
     Difficulty difficulty = new Difficulty(); // Used to access difficulty options in stat calculations.
     Item item = new Item(); // Used to access itemID manipulation methods in item.
 
@@ -109,8 +108,10 @@ public class Player extends Monster {
             raceStrBonus += 2;
             raceConBonus += 1;
         } else if (race == 3) {
+            raceDexBonus += 1;
             raceConBonus += 2;
         } else {
+            raceStrBonus += 1;
             raceDexBonus += 2;
         }
     }
@@ -307,63 +308,52 @@ public class Player extends Monster {
     }
 
     // This is used to display a formatted summary of all character data after load.
-    public void getCharacterSummary() {
-        System.out.println("-----STATS-----");
-        System.out.println("Character name: " + name);
-        System.out.println("Character level: " + level);
-        System.out.println("Character race: " + getRaceString(race));
-        System.out.println("Character experience: " + experience);
-        System.out.println("Character money: " + money);
-        System.out.println("Character current HP: " + currentHP);
-        System.out.println("Character max HP: " + maxHP);
-        System.out.println("Character strength: " + strength);
-        System.out.println("Character dexterity: " + dexterity);
-        System.out.println("Character constitution: " + constitution + "\n");
+    public String getCharacterSummary() {
+        String s;
+        s = "-----STATS-----\n\nName: " + name + "\nLevel: " + level + "\nRace: " + getRaceString(race) + "\nCharacter experience: " + experience + "\nMoney: " + money +  "\nMax HP: " + maxHP + "\nCurrent HP: " + currentHP + "\nStrength: " + strength + "\nDexterity: " + dexterity + "\nConstitution: " + constitution + "\n\n-----GEAR-----\n\nEquipped Armor: A " + item.getItemName(equippedArmor) + "\nEquipped Shield: " + item.getItemName(equippedShield) + "\nEquipped Sword: " + item.getItemName(equippedSword) + "\n\n";
         if (totalPotions > 0) {
-            System.out.println("-----POTIONS-----");
+            s = s + "-----POTIONS-----";
             if (healPotionsOne > 0) {
-                System.out.println("Healing Potions: " + healPotionsOne);
+                s = s + "Healing Potions: " + healPotionsOne + "\n";
             }
             if (healPotionsTwo > 0) {
-                System.out.println("Greater Healing Potions: " + healPotionsTwo);
+                s = s + "Greater Healing Potions: " + healPotionsTwo + "\n";
             }
             if (healPotionsThree > 0) {
-                System.out.println("Superior Healing Potions: " + healPotionsThree);
+                s = s + "Superior Healing Potions: " + healPotionsThree + "\n";
             }
             if (healPotionsFour > 0) {
-                System.out.println("Very Supreme Healing Potion: " + healPotionsFour + "\n");
+                s = s + "Pristine Healing Potion: " + healPotionsFour + "\n";
             }
+            s = s + "\n";
         }
-        System.out.println("-----GEAR-----");
-        System.out.println("Equipped Armor: A " + item.getItemName(equippedArmor));
-        System.out.println("Equipped Shield: " + item.getItemName(equippedShield));
-        System.out.println("Equipped Sword: " + item.getItemName(equippedSword) + "\n");
-        System.out.println("-----DUNGEONS-----");
+        s = s + "-----DUNGEONS-----\n\n";
         if (!plainsDungeonClear) {
-            System.out.println("Plains dungeon not cleared.");
+            s = s + "Plains dungeon not cleared.";
         } else {
-            System.out.println("Plains dungeon cleared.");
+            s = s + "Plains dungeon cleared.";
         }
         if (!coldDungeonClear) {
-            System.out.println("Cold dungeon not cleared.");
+            s = s + "Cold dungeon not cleared.";
         } else {
-            System.out.println("Cold dungeon cleared.");
+            s = s + "Cold dungeon cleared.";
         }
         if (!tropicalDungeonClear) {
-            System.out.println("Tropical dungeon not cleared.");
+            s = s + "Tropical dungeon not cleared.";
         } else {
-            System.out.println("Tropical dungeon cleared.");
+            s = s + "Tropical dungeon cleared.";
         }
         if (!shoresDungeonClear) {
-            System.out.println("Shores dungeon not cleared.");
+            s = s + "Shores dungeon not cleared.";
         } else {
-            System.out.println("Shores dungeon cleared.");
+            s = s + "Shores dungeon cleared.";
         }
         if (!mountainDungeonClear) {
-            System.out.println("Mountain dungeon not cleared.");
+            s = s + "Mountain dungeon not cleared.";
         } else {
-            System.out.println("Mountain dungeon cleared.");
+            s = s + "Mountain dungeon cleared.";
         }
+        return s;
     }
 
     // IS/CHECKS
@@ -457,187 +447,11 @@ public class Player extends Monster {
         setTotalPotions();
     }
 
-    // MOVEMENT METHODS
-    // This offers the player movement options depending on current location.
-    public void moveCharacterPrompt() {
-        char c = 0;
-        // south, east, or west only
-        boolean swe;
-        swe = posY == worldMap.getNorthLimit() && posY > worldMap.getSouthLimit() && posX < worldMap.getEastLimit() && posX > worldMap.getWestLimit();
-        while (swe) {
-            System.out.print("\nTowering glaciers block your path to the north.");
-            System.out.print("\nWhich direction would you like to go?\nEast, South or West. (e/s/w): ");
-            c = cleanChar();
-            while (c != 'e' && c != 'w' && c != 's') {
-                System.out.print("You must chose East, South or West. (e/s/w): ");
-                c = cleanChar();
-            }
-            swe = false;
-        }
-        // south and west only
-        boolean sw;
-        sw = posY == worldMap.getNorthLimit() && posY > worldMap.getSouthLimit() && posX == worldMap.getEastLimit() && posX > worldMap.getWestLimit();
-        while (sw) {
-            System.out.print("\nTowering glaciers block your path to the north, and giant mountains block your path to the east.");
-            System.out.print("\nWhich direction would you like to go?\nSouth or West. (s/w): ");
-            c = cleanChar();
-            while (c != 'w' && c != 's') {
-                System.out.print("You must chose South or West. (s/w): ");
-                c = cleanChar();
-            }
-            sw = false;
-        }
-        // south and east only
-        boolean se;
-        se = posY == worldMap.getNorthLimit() && posY > worldMap.getSouthLimit() && posX < worldMap.getEastLimit() && posX == worldMap.getWestLimit();
-        while (se) {
-            System.out.print("\nTowering glaciers block your path to the north, and a vast ocean blocks your path to the west.");
-            System.out.print("\nWhich direction would you like to go?\nSouth or East. (s/e): ");
-            c = cleanChar();
-            while (c != 'e' && c != 's') {
-                System.out.print("You must chose South or East. (s/e): ");
-                c = cleanChar();
-            }
-            se = false;
-        }
-        // north, east, or west only
-        boolean nwe;
-        nwe = posY < worldMap.getNorthLimit() && posY == worldMap.getSouthLimit() && posX < worldMap.getWestLimit() && posX > worldMap.getWestLimit();
-        while (nwe) {
-            System.out.print("\nThe jungle ends in a steep cliff which blocks your path to the south.");
-            System.out.print("\nWhich direction would you like to go?\nNorth, West or East. (n/w/e): ");
-            c = cleanChar();
-            while (c != 'n' && c != 'w' && c != 'e') {
-                System.out.print("You must chose North, West or East. (n/w/e): ");
-                c = cleanChar();
-            }
-            nwe = false;
-        }
-        // north and west only
-        boolean nw;
-        nw = posY < worldMap.getNorthLimit() && posY == worldMap.getSouthLimit() && posX == worldMap.getEastLimit() && posX > worldMap.getWestLimit();
-        while (nw) {
-            System.out.print("\nThe jungle ends in a steep cliff which blocks your path to the south, and giant mountains block your path to the east.");
-            System.out.print("\nWhich direction would you like to go?\nNorth or West. (n/w): ");
-            c = cleanChar();
-            while (c != 'w' && c != 'n') {
-                System.out.print("You must chose North or West. (n/w): ");
-                c = cleanChar();
-            }
-            nw = false;
-        }
-        // north and east only
-        boolean ne;
-        ne = posY < worldMap.getNorthLimit() && posY == worldMap.getSouthLimit() && posX < worldMap.getEastLimit() && posX == worldMap.getWestLimit();
-        while (ne) {
-            System.out.print("\nThe jungle ends in a steep cliff which blocks your path to the south, and a vast ocean blocks your path to the west.");
-            System.out.print("\nWhich direction would you like to go?\nNorth or East. (n/e): ");
-            c = cleanChar();
-            while (c != 'n' && c != 'e') {
-                System.out.print("You must chose North or East. (n/e): ");
-                c = cleanChar();
-            }
-            ne = false;
-        }
-        // north, south, and west only
-        boolean nsw;
-        nsw = posY < worldMap.getNorthLimit() && posY > worldMap.getSouthLimit() && posX == worldMap.getEastLimit() && posX > worldMap.getWestLimit();
-        while (nsw) {
-            System.out.println("\nGiant mountains block your path to the east.");
-            System.out.print("\nWhich direction would you like to go?\nNorth, West or South. (n/w/s): ");
-            c = cleanChar();
-            while (c != 'n' && c != 'w' && c != 's') {
-                System.out.print("You must chose North, West or South. (n/w/s): ");
-                c = cleanChar();
-            }
-            nsw = false;
-        }
-        // north, south, and east only nse
-        boolean nse;
-        nse = posY < worldMap.getNorthLimit() && posY > worldMap.getSouthLimit() && posX < worldMap.getEastLimit() && posX == worldMap.getWestLimit();
-        while (nse) {
-            System.out.println("\nA vast ocean blocks your path to the west.");
-            System.out.print("\nWhich direction would you like to go?\nNorth, East or South. (n/e/s): ");
-            c = cleanChar();
-            while (c != 'n' && c != 'e' && c != 's') {
-                System.out.print("You must chose North, East or South. (n/e/s): ");
-                c = cleanChar();
-            }
-            nse = false;
-        }
-        // all directions nsew
-        boolean nsew;
-        nsew = posY < worldMap.getNorthLimit() && posY > worldMap.getSouthLimit() && posX < worldMap.getEastLimit() && posX > worldMap.getWestLimit();
-        while (nsew) {
-            System.out.print("\nWhich direction would you like to go?\nNorth, East, South or West. (n/e/s/w): ");
-            c = cleanChar();
-            while (c != 'n' && c != 'e' && c != 'w' && c != 's') {
-                System.out.print("You must chose North, East, South or West. (n/e/s/w): ");
-                c = cleanChar();
-            }
-            nsew = false;
-        }
-        moveCharacter(c);
-        setBiome();
-    }
-    // This take in character movement selection, checks for out of bounds movement, the applies movement if able.
-    public void moveCharacter(char input) {
-        // check for map limits after moving
-        if (input == 'n') {
-            posY = posY + 1;
-            if (posY > worldMap.getNorthLimit()) {
-                System.out.println("Towering glaciers block your path, you can go no farther north");
-                posY = worldMap.getNorthLimit();
-            }
-        } else if (input == 's') {
-            posY = posY - 1;
-            if (posY < worldMap.getSouthLimit()) {
-                System.out.println("The jungle ends in a steep cliff, you can go no farther south.");
-                posY = worldMap.getSouthLimit();
-            }
-        } else if (input == 'e') {
-            posX = posX + 1;
-            if (posX > worldMap.getEastLimit()) {
-                System.out.println("The shore ends at a vast ocean, you can go no farther west.");
-                posX = worldMap.getEastLimit();
-            }
-        } else if (input == 'w') {
-            posX = posX - 1;
-            if (posX < worldMap.getWestLimit()) {
-                System.out.println("The giant mountains are impassable, you can go no farther east.");
-                posX = worldMap.getWestLimit();
-            }
-        }
-    }
-    // Sets posX, posY, and posZ to town.
-    public void returnToTown() {
-        posY = 0;
-        posX = 0;
-        setBiome();
-    }
-
     // OTHER METHODS:
     // This performs the level up adjustments to the character.
     public void levelUp() {
         level++;
-        // This isn't used to increase player HP, it's just for displaying to the console.
-        int hpIncrease = hpBase + constitutionMod;
         setSecondaryStats();
-        System.out.print("\nYou are now level " + level + ".\n");
-        System.out.print("You have gained " + hpIncrease + " HP, bringing your max HP to " + maxHP + ".");
     }
 
-    // This accepts a single char (but doesn't prompt) and cleans the input to lowercase.
-    private char cleanChar() {
-        Scanner s = new Scanner(System.in);
-        char c  = s.next().charAt(0);
-        c = Character.toLowerCase(c);
-        return c;
-    }
-
-    // Prints player stats to console.
-    public void printPlayerStats() {
-        System.out.println("\nCharacter Name: " + name + "");
-        getStats();
-    }
 }

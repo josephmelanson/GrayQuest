@@ -43,8 +43,8 @@ public class Monster {
     public int getWeaponMax() { return weaponMax; }
 
     // This returns a formatted summary of stats.
-    public void getStats() {
-        System.out.print("\nStrength: " + strength + "\nDexterity: " + dexterity + "\nConstitution: " + constitution + "\nStrength Modifier: " + strengthMod + "\nDexterity Modifier: " + dexterityMod + "\nConstitution Modifier: " + constitutionMod + "\nMax HP: " + maxHP);
+    public String getStats() {
+        return "Strength: " + strength + "\nDexterity: " + dexterity + "\nConstitution: " + constitution + "\nStrength Modifier: " + strengthMod + "\nDexterity Modifier: " + dexterityMod + "\nConstitution Modifier: " + constitutionMod + "\nMax HP: " + maxHP;
     }
 
     // SETTERS:

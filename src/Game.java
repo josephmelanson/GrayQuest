@@ -1,7 +1,9 @@
+import javax.swing.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Scanner;
 
 public class Game {
@@ -9,20 +11,22 @@ public class Game {
     // OBJECTS:
     private Player player = new Player(); // Used to access Player class for stat and combat calculations.
     private Monster monster = new Monster(); // Used to access monster class for stat and combat calculations.
-    private Place place = new Place(); // Used to access map boundaries.
-    private Item item = new Item(); // Used to access itemID manipulation methods in item.
+    private final Item item = new Item(); // Used to access itemID manipulation methods in item.
+    private final Place place = new Place(); // Used to access map boundaries.
     private final Text text = new Text(); // Used to access stored blocks of text.
     private final Difficulty difficulty = new Difficulty(); // Used to access difficulty options in stat and combat calculations.
 
+    private JTextArea combatLog = new JTextArea(20,60);
+    private JScrollPane sp = new JScrollPane(combatLog);
+
     // METHODS:
     // GAME METHODS:
-    // This is the main method which runs/loops the game.
     public void runGame() {
-        // START game loop
-        // declare variables
+        // This is the main method which runs/loops the game.
         boolean preGame = true;
+        updateCombatLog(text.getIntroText());
+        // START game loop
         while (preGame) {
-            System.out.println(text.getIntroText());
             preGame();
             boolean gameLoop = true;
             while (gameLoop) {
@@ -34,366 +38,257 @@ public class Game {
                     gameLoop = false;
                 }
             }
-            System.out.print("\nGame over. Choose Yes to reload or No to quit. (y/n): ");
-            char c = cleanChar();
-            while (c != 'y' && c != 'n') {
-                System.out.print("\nYou must choose Yes to reload, or No to quit. (y/n): ");
-                c = cleanChar();
+            updateCombatLog("\n-----DEATH-----\n\nYou died. Game over.");
+            String[] buttons = {"Reload", "Quit"};
+            int input = JOptionPane.showOptionDialog(null, sp, text.getTitleStamp(), JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, buttons, buttons[0]);
+            if (input == -1 || input == 1) {
+                preGame = false;
+                System.exit(0);
             }
-            preGame = c == 'y';
         }
     }
-    // This method handles character loading and creation.
+
     private void preGame() {
         player.newCharacter(); // this resets character data in the event of a soft reload
-        File f = new File("savedata.txt");
-        char c;
+        File f = new File("saveData.txt");
         if (f.exists()) {
-            System.out.print("Will you Load a game or start a New one? (l/n): ");
-            c = cleanChar();
-            while (c != 'l' && c != 'n') {
-                System.out.print("\nYou must Load a game or start a New one. (l/n): ");
-                c = cleanChar();
-            }
-            if (c == 'l') {
-                System.out.print("\n-----LOAD-----\n");
+            updateCombatLog("Save data found. Will you load the game or start a new one?");
+            String[] buttons = {"Load", "New"};
+            int input = JOptionPane.showOptionDialog(null, sp, text.getTitleStamp(), JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, buttons, buttons[0]);
+            if (input == -1) {
+                System.exit(0);
+            } else if (input == 0) {
+                updateCombatLog("\n-----LOAD DATA-----\n\n");
                 readLoadData();
                 player.setSecondaryStats();
-                player.getCharacterSummary();
+                updateCombatLog(player.getCharacterSummary());
             } else {
                 characterCreation();
             }
         } else characterCreation();
     }
 
+
     private void characterCreation() {
-        Scanner s = new Scanner(System.in);
-        System.out.print("\nEnter your character's name: ");
-        String characterName = s.next();
-        player.setName(characterName);
-        System.out.print(text.getRacePrompt());
-        char c = cleanChar();
-        while (c != 'h' && c != 'o' && c != 'd' && c != 'e') {
-            System.out.print("\nYou must choose Human, Orc, Dwarf or Elf. (h/o/d/e): ");
-            c = cleanChar();
-        }
-        if (c == 'h') {
+        updateCombatLog("\n-----CHARACTER CREATION-----\n\nEnter character name:\n");
+        String s = JOptionPane.showInputDialog(null, sp, text.getTitleStamp(), JOptionPane.PLAIN_MESSAGE);
+        player.setName(s);
+        updateCombatLog(s);
+        updateCombatLog(text.getRacePrompt());
+        String[] rButtons = {"Human", "Orc", "Dwarf", "Elf"};
+        int input = JOptionPane.showOptionDialog(null, sp, text.getTitleStamp(), JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, rButtons, rButtons[2]);
+        if (input == -1) {
+            System.exit(0);
+        } else if (input == 0) {
             player.setRace(1);
-        } else if (c == 'o') {
+        } else if (input == 1) {
             player.setRace(2);
-        } else if (c == 'd') {
+        } else if (input == 2) {
             player.setRace(3);
-        } else {
+        } else if (input == 3) {
             player.setRace(4);
+        }
+        if (player.getRaceInt() == 1 || player.getRaceInt() == 3) {
+            updateCombatLog("You are a " + player.getRaceString(player.getRaceInt()) + ".\n");
+        } else {
+            updateCombatLog("You are an " + player.getRaceString(player.getRaceInt()) + ".\n");
         }
         boolean statLoop = true;
         while (statLoop) {
             player.setMainStats();
-            player.printPlayerStats();
-            System.out.print("\n\nThese are your stats. Accept? (y/n): ");
-            c = cleanChar();
-            while (c != 'n' && c != 'y') {
-                System.out.print("\n\nYou must choose Yes to accept or No to re-roll. (y/n): ");
-                c = cleanChar();
+            updateCombatLog(player.getStats() + "\n\nWill you keep these stats or reroll?");
+            String[] sButtons = {"Keep", "Reroll"};
+            input = JOptionPane.showOptionDialog(null, sp, text.getTitleStamp(), JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, sButtons, sButtons[0]);
+            if (input == -1) {
+                System.exit(0);
+            } else if (input == 0) {
+                statLoop = false;
             }
-            statLoop = c != 'y';
         }
     }
 
     // TOWN MENU METHODS:
-    // This is the main town menu.
+
     private void townMenu() {
-        System.out.print("\n-----TOWN MENU-----\n\n");
-        System.out.print(getTownTextWithHint(player.getLevel()));
+        // Main town menu.
+        // 0 = rest, 1 = save, 2 = market, 3 = leave/map, 4 = boss
+        int c;
+        updateCombatLog("\n" + getTownTextWithHint(player.getLevel()));
         if (checkBoss()) {
-            System.out.print("\n\nWill you Rest, Save, visit the Market, return the Produce or Leave? (r/s/m/r/l): ");
+            String[] buttons = {"Rest", "Market", "Leave", "Produce"};
+            updateCombatLog("You have gathered all the glass produce. Where will you go?");
+            c = JOptionPane.showOptionDialog(null, sp, text.getTitleStamp(), JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, buttons, buttons[0]);
         } else {
-            System.out.print("\n\nWill you Rest, Save, visit the Market or Leave? (r/s/m/l): ");
+            String[] buttons = {"Rest", "Market", "Leave"};
+            updateCombatLog("Where will you go?");
+            c = JOptionPane.showOptionDialog(null, sp, text.getTitleStamp(), JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, buttons, buttons[0]);
         }
-        char c = cleanChar();
-        while (c != 'r' && c != 'l' && c != 's' && c != 'm' && c != 'p') {
-            if (checkBoss()) {
-                System.out.print("\n\nWill you Rest, Save, visit the Market, return the Produce or Leave? (r/s/m/r/l): ");
-            } else {
-                System.out.print("\n\nWill you Rest, Save, visit the Market or Leave? (r/s/m/l): ");
-            }
-            c = cleanChar();
-        }
-        if (c == 'r') {
-            System.out.println("\nYou rest and recover all your hp.");
+        if (c == -1) {
+            System.exit(0);
+        } else if (c == 0) {
             // checks for level and if so levels
             if (player.checkForLevelUp()) {
                 player.levelUp();
+                updateCombatLog("You gained enough experience to leveled!\nYou are now level " + player.getLevel() + ".");
             }
             // restores player hp
             player.setCurrentHP(player.getMaxHP());
-        } else if (c == 'l') {
-            System.out.println("\nYou leave town.");
-            player.moveCharacterPrompt();
-        } else if (c == 's') {
+            updateCombatLog("You rest and recover all your hp...");
+            // write save data
             writeSaveData();
-        } else if (c == 'm') {
+        } else if (c == 1) {
             shopMenu();
-        } else {
-            if (checkBoss()) {
-                towerMenu();
-            } else {
-                System.out.print("\nYou have not gathered all the glass produce.\n"); //Will you Rest, Save, visit the Market or Leave? (r/s/m/l):
-            }
+        } else if (c == 2) {
+            moveCharacterPrompt();
+        } else if (c == 3) {
+            // Begin final dungeon / boss encounter
+            towerMenu();
         }
     }
     // These are the shop submenus.
     private void shopMenu() {
         boolean shopLoop = true;
         while (shopLoop) {
-            System.out.println("\n-----MARKET MENU-----");
-            System.out.print("\nYou have " + player.getMoney() + " gold.\n\nChoose Armor, Weapons, Shields, Potions, or Exit. (a/w/s/p/e): ");
-            char c = cleanChar();
-            while (c != 'a' && c != 'w' && c != 's' && c != 'p' && c != 'e') {
-                System.out.println("You must choose Armor, Weapons, Shields, Potions, or Exit. (a/w/s/p/e): ");
-                c = cleanChar();
-            }
-            if (c == 'a') {
+            String[] buttons = {"Armor", "Shields", "Weapons", "Potions", "Leave"};
+            updateCombatLog("\n-----MARKET MENU-----\n\nWelcome to the market.\nYou have " + player.getMoney() + " gold.\nWhere will you shop?");
+            int c = JOptionPane.showOptionDialog(null, sp, text.getTitleStamp(), JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, buttons, buttons[0]);
+            if (c == -1) {
+                System.exit(0);
+            } else if (c == 0) {
                 armorMenu();
-            } else if (c == 'w') {
-                weaponMenu();
-            } else if (c == 's') {
+            } else if (c == 1) {
                 shieldMenu();
-            } else if (c == 'p') {
+            } else if (c == 2) {
+                weaponMenu();
+            }  else if (c == 3) {
                 potionMenu();
-            } else shopLoop = false;
+            } else if (c == 4) shopLoop = false;
         }
     }
+
     private void armorMenu() {
-        System.out.print("\n-----ARMOR SHOP-----\n");
         boolean armorLoop = true;
+        String[] armorButtons = {"Common (+1)", "Uncommon (+2)", "Rare (+3)", "Very Rare (+4)", "Leave"};
+        updateCombatLog("\n-----ARMOR SHOP-----\n\nWelcome to the armor shop.\n\nYou have " + player.getMoney() + " gold.\n\nYou are wearing " + item.getItemName(player.getEquippedArmorID()) + ".\n\nChoose your plate:\n\nCommon (+1): " + difficulty.getCommonPrice() + " gold\nUncommon (+2): " + difficulty.getUncommonPrice() + " gold\nRare (+3): " + difficulty.getRarePrice() + " gold\nVery Rare (+4): " + difficulty.getVRarePrice() + " gold\n\n\"What will you buy?");
         while (armorLoop) {
-            System.out.print("\nYou are wearing " + item.getItemName(player.getEquippedArmorID()) + ".\n");
-            System.out.print("\nYou have " + player.getMoney() + " gold.\n\nChoose your plate:\n\nCommon (+1): " + difficulty.getCommonPrice() + " GP\nUncommon (+2): " + difficulty.getUncommonPrice() + " GP\nRare (+3): " + difficulty.getRarePrice() + " GP\nVery Rare (+4): " + difficulty.getVRarePrice() + " GP\n\nor Exit (c/u/r/v/e): ");
-            char c = cleanChar();
-            while (c != 'c' && c != 'u' && c != 'r' && c != 'v' && c != 'e') {
-                System.out.print("You must choose (c/u/r/v/e): ");
-                c = cleanChar();
-            }
-            if (c == 'c') {
-                if (player.checkMoney(difficulty.getCommonPrice())) {
-                    if (player.getEquippedArmorBonus() >= 0.1) {
-                        System.out.println("You're already wearing better. No sale.");
-                    } else {
-                        player.setMoney(item.sellItem(player.getEquippedArmorID()));
-                        System.out.println("\nYou sell your " + item.getItemName(player.getEquippedArmorID()) + " for " + item.sellItem(player.getEquippedArmorID()) + " GP.");
-                        player.setEquippedArmor(1.1);
-                        System.out.println("You buy the " + item.getItemName(1.1) + " for " + difficulty.getCommonPrice() + " GP.");
-                        player.setMoney(-difficulty.getCommonPrice());
-                    }
-                } else {
-                    System.out.println("You can't afford that.");
-                }
-            } else if (c == 'u') {
-                if (player.checkMoney(difficulty.getUncommonPrice())) {
-                    if (player.getEquippedArmorBonus() >= 0.2) {
-                        System.out.println("You're already wearing better. No sale.");
-                    } else {
-                        player.setMoney(item.sellItem(player.getEquippedArmorID()));
-                        player.setEquippedArmor(1.2);
-                        player.setMoney(-difficulty.getUncommonPrice());
-                    }
-                } else {
-                    System.out.println("You can't afford that.");
-                }
-            } else if (c == 'r') {
-                if (player.checkMoney(difficulty.getRarePrice())) {
-                    if (player.getEquippedArmorBonus() >= 0.3) {
-                        System.out.println("You're already wearing better. No sale.");
-                    } else {
-                        player.setMoney(item.sellItem(player.getEquippedArmorID()));
-                        player.setEquippedArmor(1.3);
-                        player.setMoney(-difficulty.getRarePrice());
-                    }
-                } else {
-                    System.out.println("You can't afford that.");
-                }
-            } else if (c == 'v') {
-                if (player.checkMoney(difficulty.getVRarePrice())) {
-                    if (player.getEquippedArmorBonus() >= 0.4) {
-                        System.out.println("You're already wearing better. No sale.");
-                    } else {
-                        player.setMoney(item.sellItem(player.getEquippedArmorID()));
-                        player.setEquippedArmor(1.4);
-                        player.setMoney(-difficulty.getVRarePrice());
-                    }
-                } else {
-                    System.out.println("You can't afford that.");
-                }
+            // Common = 0, Uncommon = 1, Rare = 2, Very Rare = 3, Leave = 4
+            int c = JOptionPane.showOptionDialog(null, sp, text.getTitleStamp(), JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, armorButtons, armorButtons[4]);
+            if (c == -1) {
+                System.exit(0);
+            } else if (c == 0) {
+                gearCheckSell(1.1);
+            } else if (c == 1) {
+                gearCheckSell(1.2);
+            } else if (c == 2) {
+                gearCheckSell(1.3);
+            } else if (c == 3) {
+                gearCheckSell(1.4);
             } else armorLoop = false;
         }
     }
+
     private void weaponMenu() {
-        System.out.print("\n-----WEAPON SHOP-----\n");
         boolean weaponLoop = true;
+        String[] weaponButtons = {"Common (+1)", "Uncommon (+2)", "Rare (+3)", "Very Rare (+4)", "Leave"};
+        updateCombatLog("\n-----WEAPON SHOP-----\n\nWelcome to the weapon shop.\n\nYou have " + player.getMoney() + " gold.\n\nYou are wielding a " + item.getItemName(player.getEquippedSwordID()) + ".\n\nChoose your sword:\n\nCommon (+1): " + difficulty.getCommonPrice() + " gold\nUncommon (+2): " + difficulty.getUncommonPrice() + " gold\nRare (+3): " + difficulty.getRarePrice() + " gold\nVery Rare (+4): " + difficulty.getVRarePrice() + " gold\n\nWhat will you buy?");
         while (weaponLoop) {
-            System.out.print("\nYou are wearing a " + item.getItemName(player.getEquippedSwordID()) + ".\n");
-            System.out.print("\nYou have " + player.getMoney() + " gold.\n\nChoose your longsword:\n\nCommon (+1): " + difficulty.getCommonPrice() + " GP\nUncommon (+2): " + difficulty.getUncommonPrice() + " GP\nRare (+3): " + difficulty.getRarePrice() + " GP\nVery Rare (+4): " + difficulty.getVRarePrice() + " GP\n\nor Exit (c/u/r/v/e): ");
-            char c = cleanChar();
-            while (c != 'c' && c != 'u' && c != 'r' && c != 'v' && c != 'e') {
-                System.out.print("You must choose (c/u/r/v/e): ");
-                c = cleanChar();
-            }
-            if (c == 'c') {
-                if (player.checkMoney(difficulty.getCommonPrice())) {
-                    if (player.getEquippedSwordBonus() >= 0.1) {
-                        System.out.println("You're already wearing better. No sale.");
-                    } else {
-                        player.setMoney(item.sellItem(player.getEquippedSwordID()));
-                        player.setEquippedSword(2.1);
-                        player.setMoney(-difficulty.getCommonPrice());
-                    }
-                } else {
-                    System.out.println("You can't afford that.");
-                }
-            } else if (c == 'u') {
-                if (player.checkMoney(difficulty.getUncommonPrice())) {
-                    if (player.getEquippedSwordBonus() >= 0.2) {
-                        System.out.println("You're already wearing better. No sale.");
-                    } else {
-                        player.setMoney(item.sellItem(player.getEquippedSwordID()));
-                        player.setEquippedSword(2.2);
-                        player.setMoney(-difficulty.getUncommonPrice());
-                    }
-                } else {
-                    System.out.println("You can't afford that.");
-                }
-            } else if (c == 'r') {
-                if (player.checkMoney(difficulty.getRarePrice())) {
-                    if (player.getEquippedSwordBonus() >= 0.3) {
-                        System.out.println("You're already wearing better. No sale.");
-                    } else {
-                        player.setMoney(item.sellItem(player.getEquippedSwordID()));
-                        player.setEquippedSword(2.3);
-                        player.setMoney(-difficulty.getRarePrice());
-                    }
-                } else {
-                    System.out.println("You can't afford that.");
-                }
-            } else if (c == 'v') {
-                if (player.checkMoney(difficulty.getVRarePrice())) {
-                    if (player.getEquippedSwordBonus() >= 0.4) {
-                        System.out.println("You're already wearing better. No sale.");
-                    } else {
-                        player.setMoney(item.sellItem(player.getEquippedSwordID()));
-                        player.setEquippedSword(2.4);
-                        player.setMoney(-difficulty.getVRarePrice());
-                    }
-                } else {
-                    System.out.println("You can't afford that.");
-                }
+            // Common = 0, Uncommon = 1, Rare = 2, Very Rare = 3, Leave = 4
+            int c = JOptionPane.showOptionDialog(null, sp, text.getTitleStamp(), JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, weaponButtons, weaponButtons[4]);
+            if (c == -1) {
+                System.exit(0);
+            } else if (c == 0) {
+                gearCheckSell(2.1);
+            } else if (c == 1) {
+                gearCheckSell(2.2);
+            } else if (c == 2) {
+                gearCheckSell(2.3);
+            } else if (c == 3) {
+                gearCheckSell(2.4);
             } else weaponLoop = false;
         }
     }
+
     private void shieldMenu() {
-        System.out.print("\n-----SHIELD SHOP-----\n");
         boolean shieldLoop = true;
+        String[] shieldButtons = {"Common (+1)", "Uncommon (+2)", "Rare (+3)", "Very Rare (+4)", "Leave"};
+        updateCombatLog("\n-----SHIELD SHOP-----\n\nYou have " + player.getMoney() + " gold.\n\nYou are wielding a " + item.getItemName(player.getEquippedSwordID()) + ".\n\nChoose your sword:\n\nCommon (+1): " + difficulty.getCommonPrice() + " gold\nUncommon (+2): " + difficulty.getUncommonPrice() + " gold\nRare (+3): " + difficulty.getRarePrice() + " gold\nVery Rare (+4): " + difficulty.getVRarePrice() + " gold\n\nWhat will you buy?");
         while (shieldLoop) {
-            System.out.print("\nYou are wearing a " + item.getItemName(player.getEquippedShieldID()) + ".\n");
-            System.out.print("\nYou have " + player.getMoney() + " gold.\n\nChoose your shield:\n\nCommon (+1): " + difficulty.getCommonPrice() + " GP\nUncommon (+2): " + difficulty.getUncommonPrice() + " GP\nRare (+3): " + difficulty.getRarePrice() + " GP\nVery Rare (+4): " + difficulty.getVRarePrice() + " GP\n\nor Exit (c/u/r/v/e): ");
-            char c = cleanChar();
-            while (c != 'c' && c != 'u' && c != 'r' && c != 'v' && c != 'e') {
-                System.out.print("You must choose (c/u/r/v/e): ");
-                c = cleanChar();
-            }
-            if (c == 'c') {
-                if (player.checkMoney(difficulty.getCommonPrice())) {
-                    if (player.getEquippedShieldBonus() >= 0.1) {
-                        System.out.println("You're already wearing better. No sale.");
-                    } else {
-                        player.setMoney(item.sellItem(player.getEquippedShieldID()));
-                        player.setEquippedShield(3.1);
-                        player.setMoney(-difficulty.getCommonPrice());
-                    }
-                } else {
-                    System.out.println("You can't afford that.");
-                }
-            } else if (c == 'u') {
-                if (player.checkMoney(difficulty.getUncommonPrice())) {
-                    if (player.getEquippedShieldBonus() >= 0.2) {
-                        System.out.println("You're already wearing better. No sale.");
-                    } else {
-                        player.setMoney(item.sellItem(player.getEquippedShieldID()));
-                        player.setEquippedShield(3.2);
-                        player.setMoney(-difficulty.getUncommonPrice());
-                    }
-                } else {
-                    System.out.println("You can't afford that.");
-                }
-            } else if (c == 'r') {
-                if (player.checkMoney(difficulty.getRarePrice())) {
-                    if (player.getEquippedShieldBonus() >= 0.3) {
-                        System.out.println("You're already wearing better. No sale.");
-                    } else {
-                        player.setMoney(item.sellItem(player.getEquippedShieldID()));
-                        player.setEquippedShield(3.3);
-                        player.setMoney(-difficulty.getRarePrice());
-                    }
-                } else {
-                    System.out.println("You can't afford that.");
-                }
-            } else if (c == 'v') {
-                if (player.checkMoney(difficulty.getVRarePrice())) {
-                    if (player.getEquippedShieldBonus() >= 0.4) {
-                        System.out.println("You're already wearing better. No sale.");
-                    } else {
-                        player.setMoney(item.sellItem(player.getEquippedShieldID()));
-                        player.setEquippedShield(3.4);
-                        player.setMoney(-difficulty.getVRarePrice());
-                    }
-                } else {
-                    System.out.println("You can't afford that.");
-                }
+            // Common = 0, Uncommon = 1, Rare = 2, Very Rare = 3, Leave = 4
+            int c = JOptionPane.showOptionDialog(null, sp, text.getTitleStamp(), JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, shieldButtons, shieldButtons[4]);
+            if (c == -1) {
+                System.exit(0);
+            } else if (c == 0) {
+                gearCheckSell(3.1);
+            } else if (c == 1) {
+                gearCheckSell(3.2);
+            } else if (c == 2) {
+                gearCheckSell(3.3);
+            } else if (c == 3) {
+                gearCheckSell(3.4);
             } else shieldLoop = false;
         }
     }
-    private void potionMenu() {
-        System.out.print("\n-----POTION SHOP-----\n");
-        boolean potionLoop = true;
-        while (potionLoop) {
-            System.out.print("\nYou have " + player.getHealPotionsOne() + " Healing Potions, " + player.getHealPotionsTwo() + " Greater Healing Potions, " + player.getHealPotionsThree() + " Superior Healing Potions and " + player.getHealPotionsFour() + " Very Supreme Healing Potions.\n");
-            System.out.print("\nYou have " + player.getMoney() + " gold.\n\nChoose your potion:\n\nHealing Potion (2d4+2): " + difficulty.getCommonPrice() + " GP\nGreater Healing (4d4+4): " + difficulty.getUncommonPrice() + " GP\nSuperior Healing Potion (8d4+8): " + difficulty.getRarePrice() + " GP\nVery Supreme healing (10d4+20): " + difficulty.getVRarePrice() + " GP\n\nor Exit? (h/g/s/v/e): ");
-            char c = cleanChar();
-            while (c != 'h' && c != 'g' && c != 's' && c != 'v' && c != 'e') {
-                System.out.print("You must choose (h/g/s/v/e): ");
-                c = cleanChar();
+
+    public void gearCheckSell(double itemID) {
+        if (player.checkMoney(item.getItemPrice(itemID))) {
+            if (player.getEquippedArmorBonus() >= item.getItemBonusNumber(itemID)) {
+                updateCombatLog("You're wearing the same or better. No sale.");
+            } else {
+                player.setMoney(item.sellItem(player.getEquippedArmorID()));
+                player.setMoney(-item.getItemPrice(itemID));
+                updateCombatLog("You sell your " + item.getItemName(player.getEquippedArmorID()) + " for " + item.sellItem(player.getEquippedArmorID()) + " gold.\nYou buy the " + item.getItemName(itemID) + " for " + item.getItemPrice(itemID) + " gold, and equip it.");
+                player.setEquippedArmor(itemID);
             }
-            if (c == 'h') {
+        } else {
+            updateCombatLog("You can't afford that.");
+        }
+    }
+
+    private void potionMenu() {
+        boolean potionLoop = true;
+        String[] potionButtons = {"Healing", "Greater", "Superior", "Pristine", "Leave"};
+        updateCombatLog("\n-----POTION SHOP-----\n\nYou have " + player.getMoney() + " gold and the following potions:\n\nHealing Potions: " + player.getHealPotionsOne() + "\nGreater Healing Potions: " + player.getHealPotionsTwo() + "\nSuperior Healing Potions: " + player.getHealPotionsThree() + "\nPristine Healing Potions: " + player.getHealPotionsFour() + "\n\nChoose your potion:\n\nHealing Potion (2d4+2): " + difficulty.getCommonPrice() + " gold\nGreater Healing (4d4+4): " + difficulty.getUncommonPrice() + " gold\nSuperior Healing Potion (8d4+8): " + difficulty.getRarePrice() + " gold\nPristine  Healing (10d4+20): " + difficulty.getVRarePrice() + " gold");
+        while (potionLoop) {
+            // Healing = 0, Greater = 1, Superior = 2, Pristine = 3, Leave = 4
+            int c = JOptionPane.showOptionDialog(null, "What will you buy?", text.getTitleStamp(), JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, potionButtons, potionButtons[4]);
+            if (c == -1) {
+                System.exit(0);
+            } else if (c == 0) {
                 if (player.checkMoney(difficulty.getCommonPrice())) {
                     player.setHealPotionsOne(1);
                     player.setMoney(-difficulty.getCommonPrice());
+                    updateCombatLog("You buy a Healing Potion.");
                 } else {
-                    System.out.println("You can't afford that.");
+                    updateCombatLog("You can't afford that.");
                 }
-            } else if (c == 'g') {
+            } else if (c == 1) {
                 if (player.checkMoney(difficulty.getUncommonPrice())) {
                     player.setHealPotionsTwo(1);
                     player.setMoney(-difficulty.getUncommonPrice());
+                    updateCombatLog("You buy an Uncommon Healing Potion.");
                 } else {
-                    System.out.println("You can't afford that.");
+                    updateCombatLog("You can't afford that.");
                 }
-            } else if (c == 's') {
+            } else if (c == 2) {
                 if (player.checkMoney(difficulty.getRarePrice())) {
                     player.setHealPotionsThree(1);
                     player.setMoney(-difficulty.getRarePrice());
+                    updateCombatLog("You buy a Superior Healing Potion.");
                 } else {
-                    System.out.println("You can't afford that.");
+                    updateCombatLog("You can't afford that.");
                 }
-            } else if (c == 'v') {
+            } else if (c == 3) {
                 if (player.checkMoney(difficulty.getVRarePrice())) {
                     player.setHealPotionsFour(1);
                     player.setMoney(-difficulty.getVRarePrice());
+                    updateCombatLog("You buy a Pristine Healing Potion.");
                 } else {
-                    System.out.println("You can't afford that.");
+                    updateCombatLog("You can't afford that.");
                 }
             } else potionLoop = false;
         }
     }
+
     // This uses a random number and player level to determine town gossip with dungeons hints.
     public String getTownTextWithHint(int lvl) {
         int i = (int) (Math.random() * 2) + 1;
@@ -417,45 +312,42 @@ public class Game {
             if (i == 1) {
                 return text.getPlainsHint();
             } return text.getRandomTownText();
+        } else if (player.isPlainsDungeonClear() && player.isColdDungeonClear() && player.isMountainDungeonClear() && player.isShoresDungeonClear() && player.isTropicalDungeonClear()) {
+            return text.getRandomTownText(); // + text.getBossTownText();???
         } else return text.getRandomTownText();
     }
 
     // MAP MENU:
     private void mapMenu() {
-        System.out.print("\n-----MAP MENU-----");
-        char c = 'x';
         double d = 0.0;
         boolean mapLoop = true;
         while (mapLoop) {
-            System.out.print("\n");
-            place.getBiome(player.posZ);
-            if (player.getTotalPotions() <= 0) {
-                System.out.print("\nWill you Teleport to town, Search the area or Leave? (t/s/l): ");
-                c = cleanChar();
-                while (c != 't' && c != 's' && c != 'l') {
-                    System.out.print("You must Teleport to town, Search the area or Leave. (t/s/l): ");
-                    c = cleanChar();
-                }
-            } else if (player.getTotalPotions() > 0) {
-                System.out.print("\nWill you Teleport to town, Search the area, use a Potion, or Leave? (t/s/p/l): ");
-                c = cleanChar();
-                while (c != 't' && c != 's' && c != 'l' && c != 'p') {
-                    System.out.print("You must Teleport to town, Search the area, use a Potion, or Leave. (t/s/p/l): ");
-                    c = cleanChar();
-                }
+            int c;
+            if (player.getTotalPotions() > 0) {
+                String[] mapButtons = {"Search", "Travel", "Teleport", "Potion"};
+                updateCombatLog("Will you search the area, travel farther, teleport home, or use a potion?");
+                c = JOptionPane.showOptionDialog(null, sp, text.getTitleStamp() + " - Wilderness", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, mapButtons, mapButtons[1]);
+            } else {
+                String[] mapButtons = {"Search", "Travel", "Teleport"};
+                updateCombatLog("Will you search the area, travel farther, or teleport home?");
+                c = JOptionPane.showOptionDialog(null, sp, text.getTitleStamp() + " - Wilderness", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, mapButtons, mapButtons[1]);
             }
-            if (c == 't') {
-                System.out.println("You grasp your amulet and focus in prayer...");
-                player.returnToTown();
+            if (c == -1) {
+                System.exit(0);
+            }
+            // c == 0 move to else for readability
+            else if (c == 1) {
+                moveCharacterPrompt();
+            } else if (c == 2) {
+                updateCombatLog("You grasp your amulet and focus in prayer...");
+                returnToTown();
                 mapLoop = false;
-            } else if (c == 'l') {
-                player.moveCharacterPrompt();
-            } else if (c == 'p') {
+            } else if (c == 3) {
                 potionUseMenu();
             } else {
                 if (place.rollForDungeon(player.posZ, player.getLevel())) {
                     // checkDungeon returns true if player has not visited the dungeon
-                    // and generates the boss monster ID based on the biome
+                    // and generates the boss monster ID based on the biomes
                     if (checkDungeon(player.getPosZ())) {
                         d = 0.0 + (double) player.getPosZ() / 10;
                     }
@@ -469,10 +361,9 @@ public class Game {
                         mapLoop = false;
                     }
                 } else {
-                    //System.out.println("\nNo monsters, lucky!");
                     int i = item.rollForMoneyByLevel(player.getLevel());
                     player.setMoney(i);
-                    System.out.print("\nYou find " + i + " gold " + text.getRandomMoneyDesc() + ".\n");
+                    updateCombatLog("No monsters, lucky! You find " + i + " gold " + text.getRandomMoneyDesc() + ".");
                 }
             }
         }
@@ -482,28 +373,27 @@ public class Game {
     // This runs combat, returning true if the player is alive after combat has finished.
     private boolean runCombat(double monsterID) {
         loadMonsterStats(monsterID);
-        System.out.print("\n-----COMBAT MENU-----\n\n");
-        System.out.print(monster.getFlavourText());
+        updateCombatLog(monster.getFlavourText());
         rollInitiative(player.getDexterityMod(), monster.getDexterityMod());
         boolean combatLoop = true;
         while (combatLoop) {
             if (combatMenu()) {
                 combatLoop = combatRound();
                 if (monster.getCurrentHP() <= 0) {
-                    System.out.print("\n\nYou have defeated the " + monster.getName() + "!");
+                    updateCombatLog("You defeated the " + monster.getName() + "!");
                     player.setDungeonClear(monsterID);
                     player.addExperience();
                     if (player.checkForLevelUp()) {
-                        System.out.print("\nYou have defeated enough monsters to earn a level!\nReturn to town and rest to level up.\n");
+                        updateCombatLog("You have defeated enough monsters to earn a level! Return to town and rest to level up.");
                     }
                     double d = item.createRandomItem(player.getLevel());
                     if (d == 0.0) {
                         int i = item.rollForMoneyByLevel(player.getLevel());
                         player.setMoney(i);
-                        System.out.print("\nYou find " + i + " gold on the " + monster.getName() + ".");
+                        updateCombatLog("You find " + i + " gold on the " + monster.getName() + ".");
                     } else {
                         //System.out.println("-----DEBUG----- Checking itemID: " + d);
-                        System.out.print("\nYou find a " + item.getItemName(d) + " on the " + monster.getName() + ".\n");
+                        updateCombatLog("You find a " + item.getItemName(d) + " on the " + monster.getName() + ".");
                         if (d <= 3.5 && d >= 1.0) {
                             player.checkForEquipUpgrade(d);
                         } else if (d >= 4.0) {
@@ -521,70 +411,57 @@ public class Game {
     // This provides option to the player in combat.
     private boolean combatMenu() {
         monster.setDescriptor();
-        System.out.print("\n\nThe " + monster.getName() + " looks " + monster.getDescriptor() + "!\n");
-        System.out.print("\nYou have " + player.getCurrentHP() + " HP and " + player.getTotalPotions() + " potions.\n");
+        String[] combatButtons;
+        updateCombatLog("The " + monster.getName() + " looks " + monster.getDescriptor() + "!\n\nYou have " + player.getCurrentHP() + " HP and " + player.getTotalPotions() + " potions.\nWhat will you do?");
         if (potionCheck()) {
-            System.out.print("\nWill you Attack, use a Potion or Run? (a/p/r): ");
+            combatButtons = new String[]{"Attack", "Run", "Potion"};
         } else {
-            System.out.print("\nWill you Attack or Run? (a/r): ");
+            combatButtons = new String[]{"Attack", "Run"};
         }
-        char c = cleanChar();
-        while (c != 'a' && c != 'p' && c != 'r') {
-            if (potionCheck()) {
-                System.out.print("\nYou must Attack, use a Potion or Run. (a/p/r): ");
-            } else {
-                System.out.print("\nYou must Attack or Run. (a/r): ");
-            }
-            c = cleanChar();
-        }
-        while (c == 'p' && player.getTotalPotions() <= 0) {
-            System.out.print("\nYou have no potions left.\nYou must Attack or Run. (a/r): ");
-            c = cleanChar();
-        }
-        if (c == 'p' && player.getTotalPotions() >= 1) {
-            potionUseMenu();
-        }
-        if (c == 'r') {
-            System.out.print("\nYou try to run...\n");
-            return !runAway();
-        } else {
-            return true;
-        }
-    }
-    // This allows the player a chance to escape from combat.
-    private boolean runAway() {
-        int i = (int) (Math.random() * difficulty.getRunChance()) + 1;
-        if (i == 1) {
-            System.out.println("You escape from the " + monster.getName() + ".");
-            return true;
-        } else {
-            System.out.println("You can't escape the " + monster.getName() + ".");
+        int c = JOptionPane.showOptionDialog(null, sp, text.getTitleStamp() + " - Combat Menu", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, combatButtons, combatButtons[0]);
+        if (c == -1) {
+            System.exit(0);
             return false;
         }
+        if (c == 1) {
+            int i = (int) (Math.random() * difficulty.getRunChance()) + 1;
+            if (i == 1) {
+                updateCombatLog("You try to run...\nYou escape from the " + monster.getName() + "!");
+                return false;
+            } else {
+                updateCombatLog("You try to run...");
+                return true;
+            }
+        }
+        if (c == 2 && player.getTotalPotions() >= 1) {
+            potionUseMenu();
+            return true;
+        }
+        else return false;
     }
+
     // This handles the combat math. Rolls for initiative, hit and damage.
     private boolean combatRound() {
         int i;
-        System.out.print("\n");
         // if the player goes first
         if (testInitiative()) {
             // player rolls to strike first
             if (rollToHit(player.getFinalToHit(), monster.getFinalAC())) {
                 i = rollForDamage(player.getWeaponMax(), player.getWeaponMin(), player.getFinalDamageBonus());
-                System.out.print("You deal " + i + " damage to the " + monster.getName() + ".\n");
+                updateCombatLog("You deal " + i + " damage to the " + monster.getName() + ".");
                 monster.setCurrentHP(-i);
             } else {
-                System.out.print("You miss the " + monster.getName() + ".\n");
+                updateCombatLog("You miss the " + monster.getName() + ".");
             }
             // check if the monster survived
             if (monster.getCurrentHP() > 0) {
                 // then the monster rolls to strike first
                 if (rollToHit(monster.getFinalToHit(), player.getFinalAC())) {
                     i = rollForDamage(monster.getWeaponMax(), monster.getWeaponMin(), monster.getFinalDamageBonus());
-                    System.out.print("The " + monster.getName() + " hits you for " + i + " damage!");
+                    updateCombatLog("The " + monster.getName() + " hits you for " + i + " damage!");
                     player.setCurrentHP(-i);
                 } else {
-                    System.out.print("The " + monster.getName() + " misses you.");
+                    updateCombatLog("The " + monster.getName() + " misses you.");
                 }
             }
             // if the monster goes first
@@ -592,39 +469,36 @@ public class Game {
             // the monster rolls to strike
             if (rollToHit(monster.getFinalToHit(), player.getFinalAC())) {
                 i = rollForDamage(monster.getWeaponMax(), monster.getWeaponMin(), monster.getFinalDamageBonus());
-                System.out.print("The " + monster.getName() + " hits you for " + i + " damage!\n");
+                updateCombatLog("The " + monster.getName() + " hits you for " + i + " damage!");
                 player.setCurrentHP(-i);
             } else {
-                System.out.print("The " + monster.getName() + " misses you.\n");
+                updateCombatLog("The " + monster.getName() + " misses you.");
             }
             // check if the player survived
             if (player.getCurrentHP() > 0) {
                 // player rolls to strike
                 if (rollToHit(player.getFinalToHit(), monster.getFinalAC())) {
                     i = rollForDamage(player.getWeaponMax(), player.getWeaponMin(), player.getFinalDamageBonus());
-                    System.out.print("You deal " + i + " damage to the " + monster.getName() + ".");
+                    updateCombatLog("You deal " + i + " damage to the " + monster.getName() + ".");
                     monster.setCurrentHP(-i);
                 } else {
-                    System.out.print("You miss the " + monster.getName() + ".");
+                    updateCombatLog("You miss the " + monster.getName() + ".");
                 }
             }
         }
         return player.getCurrentHP() > 0;
     }
     private void towerMenu() {
-        System.out.print("\n-----TOWER MENU-----\n");
-        char c;
         boolean towerLoop = true;
+        String[] towerButtons = {"Fight", "Run"};
         while (towerLoop) {
             if (!player.isTowerOneClear() && !player.isTowerTwoClear()) {
-                System.out.print(text.getTowerDesc(0)); // Tower entrance text, 0 = Tower level 1
-                System.out.print("\nYou have " + player.getCurrentHP() + " HP and " + player.getTotalPotions() + " potions.\nWill you Fight or Run? (f/r): ");
-                c = cleanChar();
-                while (c != 'f' && c != 'r') {
-                    System.out.print("\nYou must choose to Fight or Run. (f/r): ");
-                    c = cleanChar();
-                }
-                if (c == 'f') {
+                updateCombatLog(text.getTowerDesc(0)); // Tower entrance text, 0 = Tower level 1
+                updateCombatLog("You have " + player.getCurrentHP() + " HP and " + player.getTotalPotions() + " potions.\nWhat will you do?");
+                int c = JOptionPane.showOptionDialog(null, sp, text.getTitleStamp(), JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, towerButtons, towerButtons[1]);
+                if (c == -1) {
+                    System.exit(0);
+                } else if (c == 0) {
                     runCombat(1.0);
                     if (player.currentHP > 0) {
                         player.setTowerOneClear(true);
@@ -633,14 +507,12 @@ public class Game {
                     towerLoop = false;
                 }
             } else if (player.isTowerOneClear() && !player.isTowerTwoClear()) {
-                System.out.print(text.getTowerDesc(1)); // Tower second level text, 1 = Tower level 2
-                System.out.print("\nYou have " + player.getCurrentHP() + " HP and " + player.getTotalPotions() + " potions.\nWill you Fight or Run? (f/r): ");
-                c = cleanChar();
-                while (c != 'f' && c != 'r') {
-                    System.out.print("\nYou must choose to Fight or Run. (f/r): ");
-                    c = cleanChar();
-                }
-                if (c == 'f') {
+                updateCombatLog(text.getTowerDesc(1));
+                updateCombatLog("You have " + player.getCurrentHP() + " HP and " + player.getTotalPotions() + " potions.\nWhat will you do?");
+                int c = JOptionPane.showOptionDialog(null, sp, text.getTitleStamp(), JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, towerButtons, towerButtons[1]);
+                if (c == -1) {
+                    System.exit(0);
+                } else if (c == 0) {
                     runCombat(2.0);
                     if (player.currentHP > 0) {
                         player.setTowerTwoClear(true);
@@ -649,17 +521,15 @@ public class Game {
                     towerLoop = false;
                 }
             } else {
-                System.out.print(text.getTowerDesc(2)); // Tower third level text, 2 = Tower level 3
-                System.out.print("\nYou have " + player.getCurrentHP() + " HP and " + player.getTotalPotions() + " potions.\nWill you Fight or Run? (f/r): ");
-                c = cleanChar();
-                while (c != 'f' && c != 'r') {
-                    System.out.print("\nYou must choose to Fight or Run. (f/r): ");
-                    c = cleanChar();
-                }
-                if (c == 'f') {
+                updateCombatLog(text.getTowerDesc(2));
+                updateCombatLog("You have " + player.getCurrentHP() + " HP and " + player.getTotalPotions() + " potions.\nWhat will you do?");
+                int c = JOptionPane.showOptionDialog(null, sp, text.getTitleStamp(), JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, towerButtons, towerButtons[1]);
+                if (c == -1) {
+                    System.exit(0);
+                } else if (c == 0) {
                     runCombat(3.0);
                     if (player.currentHP > 0) {
-                        System.out.println(text.getWinText());
+                        System.out.print("\n-----WIN-----\n");
                         System.out.print("\n-----GAME OVER-----\n");
                         towerLoop = false;
                     }
@@ -677,7 +547,7 @@ public class Game {
         // This reduces initializes d with a value ~0.1... less than it should be
         int i = (int) monsterID;
         double d = monsterID - i;
-        // This rounds d back up to it's proper value
+        // This rounds d back up to its proper value
         d = (double) Math.round(d * 10) / 10;
         // Loads Tower monsters
         if (d == 0.0) {
@@ -757,7 +627,7 @@ public class Game {
             } else if (i == 9) {
                 monster.setMonsterNinePointThree();
             }
-            // Loads Shores monsters
+            // Load Shores monsters
         } else if (d == 0.4) {
             if (i == 0) {
                 monster.setMonsterZeroPointFour();
@@ -834,90 +704,89 @@ public class Game {
     // COMBAT POTION MENU METHODS:
     // This returns true if the player has any potions left.
     private boolean potionCheck() { return player.getTotalPotions() >= 1; }
+
     // These display potion option to the player during combat and map.
     private void potionUseMenu() {
         int i;
-        char c;
         boolean potionLoop = true;
         // start menu
-        System.out.println("-----USE POTION MENU-----");
+        String[] potionButtons;
         while (potionLoop) {
             if (player.getTotalPotions() <= 0) {
-                System.out.println("You have no potions.");
+                updateCombatLog("You have no potions.");
                 break;
             } else {
-                System.out.println("You have:");
-                displayPotions();
-                c = cleanChar();
+                updateCombatLog("You have:");
+                potionButtons = displayPotionsForMenu().toArray(new String[0]);
             }
-            while (c != 'h' && c != 'g' && c != 's' && c != 'v' && c != 'e') {
-                System.out.print("You must choose:\n");
-                displayPotions();
-                c = cleanChar();
-            }
-            if (c == 'h') {
+            updateCombatLog("What will you drink?");
+            int c = JOptionPane.showOptionDialog(null, sp, text.getTitleStamp(), JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, potionButtons, potionButtons[potionButtons.length-1]);
+            if (c == -1) {
+                System.exit(0);
+            } else if (c == potionButtons.length-1) {
+                potionLoop = false;
+            } else if (c == 0) {
                 player.setHealPotionsOne(-1);
                 i = item.rollHealPotOne();
                 player.setCurrentHP(i);
-                System.out.println("\nYou regain " + i + " HP.\nYou're now at " + player.getCurrentHP() + " HP.");
-            } else if (c == 'g') {
+                updateCombatLog("You regain " + i + " HP.\nYou're now at " + player.getCurrentHP() + " HP.");
+            } else if (c == 1) {
                 player.setHealPotionsTwo(-1);
                 i = item.rollHealPotTwo();
                 player.setCurrentHP(i);
-                System.out.println("\nYou regain " + i + " HP.\nYou're now at " + player.getCurrentHP() + " HP.");
-            } else if (c == 's') {
+                updateCombatLog("You regain " + i + " HP.\nYou're now at " + player.getCurrentHP() + " HP.");
+            } else if (c == 2) {
                 player.setHealPotionsThree(-1);
                 i = item.rollHealPotThree();
                 player.setCurrentHP(i);
-                System.out.println("\nYou regain " + i + " HP.\nYou're now at " + player.getCurrentHP() + " HP.");
-            } else if (c == 'v') {
+                updateCombatLog("You regain " + i + " HP.\nYou're now at " + player.getCurrentHP() + " HP.");
+            } else if (c == 3) {
                 player.setHealPotionsFour(-1);
                 i = item.rollHealPotFour();
                 player.setCurrentHP(i);
-                System.out.println("\nYou regain " + i + " HP.\nYou're now at " + player.getCurrentHP() + " HP.");
-            } else {
-                potionLoop = false;
+                updateCombatLog("You regain " + i + " HP.\nYou're now at " + player.getCurrentHP() + " HP.");
             }
         }
     }
-    private void displayPotions() {
-        String options = "\nor Exit? (";
+
+    private ArrayList<String> displayPotionsForMenu() {
+        ArrayList<String> buttons = new ArrayList<>();
         if (player.getHealPotionsOne() > 0) {
-            System.out.print("\nHealing Potions (2d4+2): " + player.getHealPotionsOne() + "\n");
-            options += "h/";
+            updateCombatLog("Healing Potions (2d4+2): " + player.getHealPotionsOne());
+            buttons.add("Healing");
         }
         if (player.getHealPotionsTwo() > 0) {
-            System.out.print("\nGreater Healing Potions (4d4+4): " + player.getHealPotionsTwo() + "\n");
-            options += "g/";
+            updateCombatLog("Greater Healing Potions (4d4+4): " + player.getHealPotionsTwo());
+            buttons.add("Greater");
         }
         if (player.getHealPotionsThree() > 0) {
-            System.out.print("\nSuperior Healing Potion (8d4+8): " + player.getHealPotionsThree() + "\n");
-            options += "s/";
+            updateCombatLog("Superior Healing Potion (8d4+8): " + player.getHealPotionsThree());
+            buttons.add("Superior");
         }
         if (player.getHealPotionsFour() > 0) {
-            System.out.print("\nVery Supreme Healing Potion (10d4+10)" + player.getHealPotionsFour() + "\n");
-            options += "v/";
+            updateCombatLog("Pristine Healing Potion (10d4+10)" + player.getHealPotionsFour());
+            buttons.add("Pristine");
         }
-        options += "e): ";
-        System.out.print(options);
+        buttons.add("Exit");
+        return buttons;
     }
 
     // READ/WRITE METHODS:
     // This writes character data to the save file.
     private void writeSaveData() {
         try {
-            java.io.File f = new java.io.File("savedata.txt");
+            java.io.File f = new java.io.File("saveData.txt");
             if (f.createNewFile()) {
-                System.out.println("No save exists. Saving...");
+                updateCombatLog("No save exists. Saving...");
             } else {
-                System.out.println("Old save exists. Overwriting...");
+                updateCombatLog("Old save exists. Overwriting...");
             }
         } catch (IOException e) {
-            System.out.println("An error occurred.");
+            updateCombatLog("An error occurred." + e);
             e.printStackTrace();
         }
         try {
-            FileWriter fW = new FileWriter("savedata.txt");
+            FileWriter fW = new FileWriter("saveData.txt");
             fW.write(player.getName());
             fW.write(System.lineSeparator());
             int[] intData = {player.getLevel(), player.getRaceInt(), player.getExperience(), player.getMoney(), player.getPosZ(), player.getPosX(), player.getPosY(), player.getCurrentHP(), player.getMaxHP(), player.getStrength(), player.getConstitution(), player.getDexterity(), player.getHealPotionsOne(), player.getHealPotionsTwo(), player.getHealPotionsThree(), player.getHealPotionsFour()};
@@ -936,9 +805,9 @@ public class Game {
                 fW.write(System.lineSeparator());
             }
             fW.close();
-            System.out.println("...save complete!");
+            updateCombatLog("...save complete!");
         } catch (IOException e) {
-            System.out.println("An error occurred.");
+            updateCombatLog("An error occurred." + e);
             e.printStackTrace();
         }
     }
@@ -946,7 +815,7 @@ public class Game {
     // This reads character data from the save file and sets it to the current player.
     private void readLoadData() {
         try {
-            java.io.File f = new java.io.File("savedata.txt");
+            java.io.File f = new java.io.File("saveData.txt");
             Scanner s = new Scanner(f);
             while (s.hasNextLine()) {
                 for (int i = 0; i < 27; i++) {
@@ -1010,61 +879,53 @@ public class Game {
             }
             s.close();
         } catch (FileNotFoundException e) {
-            System.out.println("An error occurred.");
+            updateCombatLog("An error occurred." + e);
             e.printStackTrace();
         }
     }
 
     // OTHER METHODS:
-    // This accepts a single char (but doesn't prompt) and cleans the input to lowercase.
-    private char cleanChar() {
-        Scanner s = new Scanner(System.in);
-        char c = s.next().charAt(0);
-        c = Character.toLowerCase(c);
-        return c;
-    }
-
-    // This returns true if the player has not cleared the dungeon in the supplied int biome.
+    // Returns true if the player has not cleared the dungeon in the supplied int biome.
     private boolean checkDungeon(int z) {
         if (z == 1) {
             if (player.isColdDungeonClear()) {
-                System.out.println("You discover an entrance to a dungeon, but you have already cleared it.");
+                updateCombatLog("You discover an entrance to a dungeon, but you have already cleared it.");
                 return false;
             } else {
-                System.out.println("You discover the frozen dungeon!");
+                updateCombatLog("You discover the frozen dungeon!");
                 return true;
             }
         } else if (z == 2) {
             if (player.isTropicalDungeonClear()) {
-                System.out.println("You discover an entrance to a dungeon, but you have already cleared it.");
+                updateCombatLog("You discover an entrance to a dungeon, but you have already cleared it.");
                 return false;
             } else {
-                System.out.println("You discover the jungle dungeon!");
+                updateCombatLog("You discover the jungle dungeon!");
                 return true;
             }
         } else if (z == 3) {
             if (player.isPlainsDungeonClear()) {
-                System.out.println("You discover an entrance to a dungeon, but you have already cleared it.");
+                updateCombatLog("You discover an entrance to a dungeon, but you have already cleared it.");
                 return false;
             } else {
-                System.out.println("You discover the plains dungeon!");
+                updateCombatLog("You discover the plains dungeon!");
                 return true;
             }
         } else if (z == 4) {
             if (player.isShoresDungeonClear()) {
-                System.out.println("You discover an entrance to a dungeon, but you have already cleared it.");
+                updateCombatLog("You discover an entrance to a dungeon, but you have already cleared it.");
                 return false;
             } else {
-                System.out.println("You discover the shore dungeon!");
+                updateCombatLog("You discover the shore dungeon!");
                 return true;
             }
             // this is "else if" instead of "else" to support future biomes/dungeons
         } else if (z == 5) {
             if (player.isMountainDungeonClear()) {
-                System.out.println("You discover an entrance to a dungeon, but you have already cleared it.");
+                updateCombatLog("You discover an entrance to a dungeon, but you have already cleared it.");
                 return false;
             } else {
-                System.out.println("You discover the mountain dungeon!");
+                updateCombatLog("You discover the mountain dungeon!");
                 return true;
             }
         } else {
@@ -1072,13 +933,214 @@ public class Game {
         }
     }
 
-    // This returns true if the player has cleared all the dungeons.
+    // Returns true if the player has cleared all the dungeons.
     private boolean checkBoss() {
         return player.isPlainsDungeonClear() && player.isColdDungeonClear() && player.isShoresDungeonClear() && player.isTropicalDungeonClear() && player.isMountainDungeonClear();
     }
 
-    // This returns true if the player is in town.
-    private boolean checkTown() {
-        return player.getPosZ() == 0;
+    // Returns true if the player is in town.
+    private boolean checkTown() { return player.getPosZ() == 0; }
+
+
+
+    // MOVEMENT METHODS
+    // This offers the player movement options depending on current location.
+    public void moveCharacterPrompt() {
+        char d = 'x'; //disposable value
+        int c;
+        if (player.getPosY() < place.getNorthLimit() && player.getPosY() > place.getSouthLimit() && player.getPosX() < place.getEastLimit() && player.getPosX() > place.getWestLimit()) {
+            // all directions n-e-s-w
+            updateCombatLog("What direction will you go?");
+            String[] moveButtons = {"North", "East","South", "West"};
+            c = JOptionPane.showOptionDialog(null, sp, text.getTitleStamp(), JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, moveButtons, moveButtons[0]);
+            if (c == -1) {
+                System.exit(0);
+            } else if (c == 0) {
+                d = 'n';
+            } else if (c == 1) {
+                d = 'e';
+            } else if (c == 2) {
+                d = 's';
+            } else if (c == 3) {
+                d = 'w';
+            }
+        } else if (player.getPosY() == place.getNorthLimit() && player.getPosY() > place.getSouthLimit() && player.getPosX() == place.getEastLimit() && player.getPosX() > place.getWestLimit()) {
+            // south and west only
+            updateCombatLog("Towering glaciers block your path to the north, and giant mountains block your path to the east.\nWhat direction will you go?");
+            String[] moveButtons = {"South", "West"};
+            c = JOptionPane.showOptionDialog(null, sp, text.getTitleStamp(), JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, moveButtons, moveButtons[0]);
+            if (c == -1) {
+                System.exit(0);
+            } else if (c == 0) {
+                d = 's';
+            } else if (c == 1) {
+                d = 'w';
+            }
+        } else if (player.getPosY() == place.getNorthLimit() && player.getPosY() > place.getSouthLimit() && player.getPosX() < place.getEastLimit() && player.getPosX() == place.getWestLimit()) {
+            // south and east only
+            updateCombatLog("Towering glaciers block your path to the north, and a vast ocean blocks your path to the west.\nWhat direction will you go?");
+            String[] moveButtons = {"South", "East"};
+            c = JOptionPane.showOptionDialog(null, sp, text.getTitleStamp(), JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, moveButtons, moveButtons[0]);
+            if (c == -1) {
+                System.exit(0);
+            } else if (c == 0) {
+                d = 's';
+            } else if (c == 1) {
+                d = 'e';
+            }
+        } else if (player.getPosY() < place.getNorthLimit() && player.getPosY() == place.getSouthLimit() && player.getPosX() == place.getEastLimit() && player.getPosX() > place.getWestLimit()) {
+            // north and west only
+            updateCombatLog("The jungle ends in a steep cliff which blocks your path to the south, and giant mountains block your path to the east.\nWhat direction will you go?");
+            String[] moveButtons = {"North", "West"};
+            c = JOptionPane.showOptionDialog(null, sp, text.getTitleStamp(), JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, moveButtons, moveButtons[0]);
+            if (c == -1) {
+                System.exit(0);
+            } else if (c == 0) {
+                d = 'n';
+            } else if (c == 1) {
+                d = 'w';
+            }
+        } else if (player.getPosY() < place.getNorthLimit() && player.getPosY() == place.getSouthLimit() && player.getPosX() < place.getEastLimit() && player.getPosX() == place.getWestLimit()) {
+            // north and east only
+            updateCombatLog("The jungle ends in a steep cliff which blocks your path to the south, and a vast ocean blocks your path to the west.\nWhat direction will you go?");
+            String[] moveButtons = {"North", "East"};
+            c = JOptionPane.showOptionDialog(null, sp, text.getTitleStamp(), JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, moveButtons, moveButtons[0]);
+            if (c == -1) {
+                System.exit(0);
+            } else if (c == 0) {
+                d = 'n';
+            } else if (c == 1) {
+                d = 'e';
+            }
+        } else if (player.getPosY() < place.getNorthLimit() && player.getPosY() > place.getSouthLimit() && player.getPosX() == place.getEastLimit() && player.getPosX() > place.getWestLimit()) {
+            // north, south, and west only
+            updateCombatLog("Giant mountains block your path to the east.\nWhat direction will you go?");
+            String[] moveButtons = {"North", "South", "West"};
+            c = JOptionPane.showOptionDialog(null, sp, text.getTitleStamp(), JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, moveButtons, moveButtons[0]);
+            if (c == -1) {
+                System.exit(0);
+            } else if (c == 0) {
+                d = 'n';
+            } else if (c == 1) {
+                d = 's';
+            } else if (c == 2) {
+                d = 'w';
+            }
+        } else if (player.getPosY() < place.getNorthLimit() && player.getPosY() > place.getSouthLimit() && player.getPosX() < place.getEastLimit() && player.getPosX() == place.getWestLimit()) {
+            // north, south, and east only nse
+            updateCombatLog("A vast ocean blocks your path to the west.\nWhat direction will you go?");
+            String[] moveButtons = {"North", "East", "South"};
+            c = JOptionPane.showOptionDialog(null, sp, text.getTitleStamp(), JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, moveButtons, moveButtons[0]);
+            if (c == -1) {
+                System.exit(0);
+            } else if (c == 0) {
+                d = 'n';
+            } else if (c == 1) {
+                d = 'e';
+            } else if (c == 2) {
+                d = 's';
+            }
+        } else if (player.getPosY() < place.getNorthLimit() && player.getPosY() == place.getSouthLimit() && player.getPosX() < place.getWestLimit() && player.getPosX() > place.getWestLimit()) {
+            // north, east, or west only
+            updateCombatLog("The jungle ends in a steep cliff which blocks your path to the south.\nWhat direction will you go?");
+            String[] moveButtons = {"North", "East", "West"};
+            c = JOptionPane.showOptionDialog(null, sp, text.getTitleStamp(), JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, moveButtons, moveButtons[0]);
+            if (c == -1) {
+                System.exit(0);
+            } else if (c == 0) {
+                d = 'n';
+            } else if (c == 1) {
+                d = 'e';
+            } else if (c == 2) {
+                d = 'w';
+            }
+        } else if (player.getPosY() == place.getNorthLimit() && player.getPosY() > place.getSouthLimit() && player.getPosX() < place.getEastLimit() && player.getPosX() > place.getWestLimit()) {
+            // south, east, or west only
+            updateCombatLog("Towering glaciers block your path to the north.\nWhich direction would you like to go?\nWhat direction will you go?");
+            String[] moveButtons = {"East", "South", "West"};
+            c = JOptionPane.showOptionDialog(null, sp, text.getTitleStamp(), JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, moveButtons, moveButtons[0]);
+            if (c == -1) {
+                System.exit(0);
+            } else if (c == 0) {
+                d = 'e';
+            } else if (c == 1) {
+                d = 's';
+            } else if (c == 2) {
+                d = 'w';
+            }
+        }
+        c = 4;
+        if (d == 'n') {
+            c = 0;
+        } else if (d == 'e') {
+            c = 1;
+        } else if (d == 's') {
+            c = 2;
+        } else if (d == 'w') {
+            c = 3;
+        }
+        moveCharacter(c);
     }
+
+    // This take in character movement selection, checks for out of bounds movement, the applies movement if able.
+    public void moveCharacter(int i) {
+        if (i == 0) {
+            if (player.getPosY() + 1 > place.getNorthLimit()) {
+                updateCombatLog("Towering glaciers block your path, you can go no farther north");
+            } else {
+                player.setPosY(player.getPosY() + 1);
+            }
+        } else if (i == 1) {
+            if (player.getPosY() - 1 < place.getSouthLimit()) {
+                updateCombatLog("The jungle ends in a steep cliff, you can go no farther south.");
+            } else {
+                player.setPosY(player.getPosY() - 1);
+            }
+        } else if (i == 2) {
+            if (player.getPosX() + 1 > place.getEastLimit()) {
+                updateCombatLog("The shore ends at a vast ocean, you can go no farther west.");
+            } else {
+                player.setPosX(player.getPosX() + 1);
+            }
+        } else if (i == 3) {
+            if (player.getPosX() - 1 < place.getWestLimit()) {
+                updateCombatLog("The giant mountains are impassable, you can go no farther east.");
+            } else {
+                player.setPosX(player.getPosX() - 1);
+            }
+        } else if (i == 4) {
+            updateCombatLog("\n-----ERROR IN moveCharacterPrompt()-----\n"); // DEBUG CODE
+        }
+        setBiome();
+    }
+
+    // Sets posX, posY, and posZ to town.
+    public void returnToTown() {
+        player.setPosX(0);
+        player.setPosY(0);
+        setBiome();
+    }
+
+    // Called at the end of movement.
+    public void setBiome() {
+        if (player.getPosY() == 0 && player.getPosX() == 0) {
+            player.setPosZ(0);
+        } else if (player.getPosY() > 5) {
+            player.setPosZ(1);
+        } else if (player.getPosY() < -5) {
+            player.setPosZ(2);
+        } else if (player.getPosX() == -3) {
+            player.setPosZ(4);
+        } else if (player.getPosX() == 3) {
+            player.setPosZ(5);
+        } else {
+            player.setPosZ(3);
+        }
+    }
+
+    private void updateCombatLog(String newLine) {
+        combatLog.append(newLine + "\n");
+        combatLog.getCaret().setDot(Integer.MAX_VALUE);
+    }
+
 }

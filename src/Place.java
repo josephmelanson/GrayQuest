@@ -2,12 +2,6 @@ public class Place {
 
     Difficulty difficulty = new Difficulty();
 
-    // WORLD MAP BORDERS
-    private final int northLimit = 9;
-    private final int eastLimit = 3;
-    private final int southLimit = -9;
-    private final int westLimit = -3;
-
     // generates a monsterID based on the characters level
     // takes in biome number as z
     public double rollForMonsterByLevel(double z, int lvl) {
@@ -53,10 +47,14 @@ public class Place {
         }
     }
 
-    public int getNorthLimit() { return northLimit; }
-    public int getEastLimit() { return eastLimit; }
-    public int getSouthLimit() { return southLimit; }
-    public int getWestLimit() { return westLimit; }
+    public int getNorthLimit() { // WORLD MAP BORDERS
+        return 9; }
+    public int getEastLimit() {
+        return 3; }
+    public int getSouthLimit() {
+        return -9; }
+    public int getWestLimit() {
+        return -3; }
 
     // chance to encounter a dungeon
     public boolean rollForDungeon(int z, int lvl) {
