@@ -30,7 +30,7 @@ public class Place {
     }
 
     // GETTERS
-    // print biome description
+    // print biome description - do I still need this?
     public void getBiome(int posZ) {
         if (posZ == 0) {
             System.out.println("\nYou are in town.");
@@ -47,14 +47,11 @@ public class Place {
         }
     }
 
-    public int getNorthLimit() { // WORLD MAP BORDERS
-        return 9; }
-    public int getEastLimit() {
-        return 3; }
-    public int getSouthLimit() {
-        return -9; }
-    public int getWestLimit() {
-        return -3; }
+    // WORLD MAP BORDERS
+    public int getNorthLimit() { return 9; }
+    public int getEastLimit() { return 3; }
+    public int getSouthLimit() { return -9; }
+    public int getWestLimit() { return -3; }
 
     // chance to encounter a dungeon
     public boolean rollForDungeon(int z, int lvl) {

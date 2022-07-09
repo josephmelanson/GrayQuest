@@ -38,7 +38,7 @@ public class Game {
                     gameLoop = false;
                 }
             }
-            updateCombatLog("\n-----DEATH-----\n\nYou died. Game over.");
+            updateCombatLog(text.getDeathText());
             String[] buttons = {"Reload", "Quit"};
             int input = JOptionPane.showOptionDialog(null, sp, text.getTitleStamp(), JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, buttons, buttons[0]);
             if (input == -1 || input == 1) {
@@ -96,7 +96,7 @@ public class Game {
         boolean statLoop = true;
         while (statLoop) {
             player.setMainStats();
-            updateCombatLog(player.getStats() + "\n\nWill you keep these stats or reroll?");
+            updateCombatLog(player.getStats() + "\nWill you keep these stats or reroll?\n");
             String[] sButtons = {"Keep", "Reroll"};
             input = JOptionPane.showOptionDialog(null, sp, text.getTitleStamp(), JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, sButtons, sButtons[0]);
             if (input == -1) {
@@ -113,32 +113,35 @@ public class Game {
         // Main town menu.
         // 0 = rest, 1 = save, 2 = market, 3 = leave/map, 4 = boss
         int c;
-        updateCombatLog("\n" + getTownTextWithHint(player.getLevel()));
-        if (checkBoss()) {
-            String[] buttons = {"Rest", "Market", "Leave", "Produce"};
+        updateCombatLog(getTownTextWithHint(player.getLevel()));
+        String[] buttons;
+        if (player.checkForTowerReady()) {
+            buttons = new String[]{"Rest", "Market", "Leave", "Produce"};
             updateCombatLog("You have gathered all the glass produce. Where will you go?");
-            c = JOptionPane.showOptionDialog(null, sp, text.getTitleStamp(), JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, buttons, buttons[0]);
         } else {
-            String[] buttons = {"Rest", "Market", "Leave"};
-            updateCombatLog("Where will you go?");
-            c = JOptionPane.showOptionDialog(null, sp, text.getTitleStamp(), JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, buttons, buttons[0]);
+            buttons = new String[]{"Rest", "Market", "Leave"};
+            updateCombatLog("Where will you go?\n");
         }
+        c = JOptionPane.showOptionDialog(null, sp, text.getTitleStamp(), JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, buttons, buttons[0]);
         if (c == -1) {
             System.exit(0);
         } else if (c == 0) {
+            updateCombatLog(text.getRestText());
             // checks for level and if so levels
             if (player.checkForLevelUp()) {
                 player.levelUp();
-                updateCombatLog("You gained enough experience to leveled!\nYou are now level " + player.getLevel() + ".");
+                updateCombatLog("You gained enough experience to leveled!\nYou are now level " + player.getLevel() + ".\n");
             }
             // restores player hp
             player.setCurrentHP(player.getMaxHP());
-            updateCombatLog("You rest and recover all your hp...");
+            updateCombatLog("You rest and recover all your hp.\n");
             // write save data
             writeSaveData();
         } else if (c == 1) {
+            updateCombatLog("You go to the market.\n");
             shopMenu();
         } else if (c == 2) {
+            updateCombatLog("You leave town.\n");
             moveCharacterPrompt();
         } else if (c == 3) {
             // Begin final dungeon / boss encounter
@@ -323,15 +326,15 @@ public class Game {
         boolean mapLoop = true;
         while (mapLoop) {
             int c;
+            String[] buttons;
             if (player.getTotalPotions() > 0) {
-                String[] mapButtons = {"Search", "Travel", "Teleport", "Potion"};
+                buttons = new String[]{"Search", "Travel", "Teleport", "Potions"};
                 updateCombatLog("Will you search the area, travel farther, teleport home, or use a potion?");
-                c = JOptionPane.showOptionDialog(null, sp, text.getTitleStamp() + " - Wilderness", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, mapButtons, mapButtons[1]);
             } else {
-                String[] mapButtons = {"Search", "Travel", "Teleport"};
-                updateCombatLog("Will you search the area, travel farther, or teleport home?");
-                c = JOptionPane.showOptionDialog(null, sp, text.getTitleStamp() + " - Wilderness", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, mapButtons, mapButtons[1]);
+                buttons = new String[]{"Search", "Travel", "Teleport"};
+                updateCombatLog("Will you search the area, travel farther, or teleport home?\n");
             }
+            c = JOptionPane.showOptionDialog(null, sp, text.getTitleStamp(), JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, buttons, buttons[1]);
             if (c == -1) {
                 System.exit(0);
             }
@@ -378,10 +381,9 @@ public class Game {
         boolean combatLoop = true;
         while (combatLoop) {
             if (combatMenu()) {
-                combatLoop = combatRound();
                 if (monster.getCurrentHP() <= 0) {
                     updateCombatLog("You defeated the " + monster.getName() + "!");
-                    player.setDungeonClear(monsterID);
+                    updateCombatLog(player.setDungeonClear(monsterID));
                     player.addExperience();
                     if (player.checkForLevelUp()) {
                         updateCombatLog("You have defeated enough monsters to earn a level! Return to town and rest to level up.");
@@ -395,7 +397,7 @@ public class Game {
                         //System.out.println("-----DEBUG----- Checking itemID: " + d);
                         updateCombatLog("You find a " + item.getItemName(d) + " on the " + monster.getName() + ".");
                         if (d <= 3.5 && d >= 1.0) {
-                            player.checkForEquipUpgrade(d);
+                            updateCombatLog(player.checkForEquipUpgrade(d));
                         } else if (d >= 4.0) {
                             player.addPotion(d);
                         }
@@ -410,34 +412,33 @@ public class Game {
     }
     // This provides option to the player in combat.
     private boolean combatMenu() {
+        boolean b = true;
         monster.setDescriptor();
         String[] combatButtons;
-        updateCombatLog("The " + monster.getName() + " looks " + monster.getDescriptor() + "!\n\nYou have " + player.getCurrentHP() + " HP and " + player.getTotalPotions() + " potions.\nWhat will you do?");
         if (potionCheck()) {
-            combatButtons = new String[]{"Attack", "Run", "Potion"};
+            combatButtons = new String[]{ "Attack", "Run", "Potions" };
         } else {
-            combatButtons = new String[]{"Attack", "Run"};
+            combatButtons = new String[]{ "Attack", "Run" };
         }
-        int c = JOptionPane.showOptionDialog(null, sp, text.getTitleStamp() + " - Combat Menu", JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, combatButtons, combatButtons[0]);
+        updateCombatLog("The " + monster.getName() + " looks " + monster.getDescriptor() + "!\n\nYou have " + player.getCurrentHP() + " HP and " + player.getTotalPotions() + " potions.\nWhat will you do?");
+        int c = JOptionPane.showOptionDialog(null, sp, text.getTitleStamp(), JOptionPane.DEFAULT_OPTION, JOptionPane.PLAIN_MESSAGE, null, combatButtons, combatButtons[0]);
         if (c == -1) {
             System.exit(0);
-            return false;
-        }
-        if (c == 1) {
+            b = false;
+        } else if (c == 0) {
+            b = combatRound();
+        } else if (c == 1) {
             int i = (int) (Math.random() * difficulty.getRunChance()) + 1;
             if (i == 1) {
                 updateCombatLog("You try to run...\nYou escape from the " + monster.getName() + "!");
-                return false;
+                b = false;
             } else {
                 updateCombatLog("You try to run...");
-                return true;
             }
-        }
-        if (c == 2 && player.getTotalPotions() >= 1) {
+        } else if (c == 2) {
             potionUseMenu();
-            return true;
         }
-        else return false;
+        return b;
     }
 
     // This handles the combat math. Rolls for initiative, hit and damage.
@@ -464,7 +465,7 @@ public class Game {
                     updateCombatLog("The " + monster.getName() + " misses you.");
                 }
             }
-            // if the monster goes first
+        // if the monster goes first
         } else {
             // the monster rolls to strike
             if (rollToHit(monster.getFinalToHit(), player.getFinalAC())) {
@@ -488,6 +489,7 @@ public class Game {
         }
         return player.getCurrentHP() > 0;
     }
+
     private void towerMenu() {
         boolean towerLoop = true;
         String[] towerButtons = {"Fight", "Run"};
@@ -529,8 +531,7 @@ public class Game {
                 } else if (c == 0) {
                     runCombat(3.0);
                     if (player.currentHP > 0) {
-                        System.out.print("\n-----WIN-----\n");
-                        System.out.print("\n-----GAME OVER-----\n");
+                        updateCombatLog(text.getWinText());
                         towerLoop = false;
                     }
                 } else {
@@ -887,61 +888,56 @@ public class Game {
     // OTHER METHODS:
     // Returns true if the player has not cleared the dungeon in the supplied int biome.
     private boolean checkDungeon(int z) {
+        boolean b;
         if (z == 1) {
             if (player.isColdDungeonClear()) {
                 updateCombatLog("You discover an entrance to a dungeon, but you have already cleared it.");
-                return false;
+                b = false;
             } else {
                 updateCombatLog("You discover the frozen dungeon!");
-                return true;
+                b = true;
             }
         } else if (z == 2) {
             if (player.isTropicalDungeonClear()) {
                 updateCombatLog("You discover an entrance to a dungeon, but you have already cleared it.");
-                return false;
+                b = false;
             } else {
                 updateCombatLog("You discover the jungle dungeon!");
-                return true;
+                b = true;
             }
         } else if (z == 3) {
             if (player.isPlainsDungeonClear()) {
                 updateCombatLog("You discover an entrance to a dungeon, but you have already cleared it.");
-                return false;
+                b = false;
             } else {
                 updateCombatLog("You discover the plains dungeon!");
-                return true;
+                b = true;
             }
         } else if (z == 4) {
             if (player.isShoresDungeonClear()) {
                 updateCombatLog("You discover an entrance to a dungeon, but you have already cleared it.");
-                return false;
+                b = false;
             } else {
                 updateCombatLog("You discover the shore dungeon!");
-                return true;
+                b = true;
             }
             // this is "else if" instead of "else" to support future biomes/dungeons
         } else if (z == 5) {
             if (player.isMountainDungeonClear()) {
                 updateCombatLog("You discover an entrance to a dungeon, but you have already cleared it.");
-                return false;
+                b = false;
             } else {
                 updateCombatLog("You discover the mountain dungeon!");
-                return true;
+                b = true;
             }
         } else {
-            return false;
+            b = false;
         }
-    }
-
-    // Returns true if the player has cleared all the dungeons.
-    private boolean checkBoss() {
-        return player.isPlainsDungeonClear() && player.isColdDungeonClear() && player.isShoresDungeonClear() && player.isTropicalDungeonClear() && player.isMountainDungeonClear();
+        return b;
     }
 
     // Returns true if the player is in town.
     private boolean checkTown() { return player.getPosZ() == 0; }
-
-
 
     // MOVEMENT METHODS
     // This offers the player movement options depending on current location.
@@ -1088,24 +1084,28 @@ public class Game {
             if (player.getPosY() + 1 > place.getNorthLimit()) {
                 updateCombatLog("Towering glaciers block your path, you can go no farther north");
             } else {
+                updateCombatLog("You go north.\n");
                 player.setPosY(player.getPosY() + 1);
             }
         } else if (i == 1) {
             if (player.getPosY() - 1 < place.getSouthLimit()) {
                 updateCombatLog("The jungle ends in a steep cliff, you can go no farther south.");
             } else {
+                updateCombatLog("You go south.\n");
                 player.setPosY(player.getPosY() - 1);
             }
         } else if (i == 2) {
             if (player.getPosX() + 1 > place.getEastLimit()) {
                 updateCombatLog("The shore ends at a vast ocean, you can go no farther west.");
             } else {
+                updateCombatLog("You go east.\n");
                 player.setPosX(player.getPosX() + 1);
             }
         } else if (i == 3) {
             if (player.getPosX() - 1 < place.getWestLimit()) {
                 updateCombatLog("The giant mountains are impassable, you can go no farther east.");
             } else {
+                updateCombatLog("You go west.\n");
                 player.setPosX(player.getPosX() - 1);
             }
         } else if (i == 4) {

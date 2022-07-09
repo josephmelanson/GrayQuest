@@ -5,7 +5,7 @@ public class Text {
 
     // MEMBER VARIABLES:
     // This ArrayList holds gossip spoken to player on returning to down. This is also where hint gossip is displayed.
-    private final ArrayList<String> townText = new ArrayList<>(Arrays.asList("Welcome back.", "Back again?", "Haven't I seen you here before?", "You're looking stronger."));
+    private final ArrayList<String> townText = new ArrayList<>(Arrays.asList("\"Welcome back.\"\n", "\"Back again?\"\n", "\"Haven't I seen you here before?\"\n", "\"You're looking stronger.\"\n"));
     // This ArrayList contains description of loot containers on the world map.
     private final ArrayList<String> moneyDesc = new ArrayList<>(Arrays.asList("in a rotten boot", "in a hallow tree-stump", "in a small coin-purse", "in a large coin-purse", "in an old back-pack", "in a small treasure chest", "in a large treasure chest", "in a broken musical instrument", "in a smelly hat", "in a broken wagon", "in a hole in the ground", "in a small cave", "behind a large rock", "under some bushes", "under a broken shield", "in a series of increasingly smaller containers", "in a dirty rug", "in an old barrel", "in the ashes of a campfire", "hidden in a tree", "on a dead Goblin", "on a dead traveler", "in a foot-print the size of a large house", "a large circular burned out patch", "sitting under a broken trap", "on a stained altar", "among some ruins", "in a pile of muck"));
     // This ArrayList contains the descriptions for each level of the final dungeon/boss fights.
@@ -13,14 +13,15 @@ public class Text {
 
     // GETTERS:
     // This displays game name and version number.
-    public String getTitleStamp() { return "GrayQuest v" + "1.0"; }
-
-    public String getIntroText() { return "Welcome to " + getTitleStamp() + "!"; }
+    public String getTitleStamp() { return "GrayQuest v" + "1.1"; }
+    public String getIntroText() { return "Welcome to " + getTitleStamp() + "!\n"; }
+    public String getRestText() { return "You return to your room for the night.\n"; }
 
     // This displays the race prompt for character creation.
-    public String getRacePrompt() { return "\n-----RACE OPTIONS-----\n\nHuman:\tSTR +1\tDEX +1\tCON +1\nOrc:\tSTR +2\t----------\tCON +1\nDwarf:\t----------\tDEX +1\tCON +2\nElf:\tSTR +1\tDEX +2\t----------\n\nChoose your race:\n\n"; } // This is the race options menu.
+    public String getRacePrompt() { return "\n-----RACE OPTIONS-----\n\nHuman:\tSTR +1\tDEX +1\tCON +1\nOrc:\tSTR +2\t----------\tCON +1\nDwarf:\t----------\tDEX +1\tCON +2\nElf:\tSTR +1\tDEX +2\t----------\n\nChoose your race:\n"; } // This is the race option menu.
 
     public String getWinText() { return "\n-----YOU WIN-----\n"; }
+    public String getDeathText() { return "\n-----DEATH-----\n\nYou died. Game over.\n"; }
 
     // This uses a random number to determine map loot container description.
     public String getRandomMoneyDesc() { return moneyDesc.get((int)(Math.random() * (moneyDesc.size()))); }

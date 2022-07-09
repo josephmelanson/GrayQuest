@@ -1,5 +1,3 @@
-import java.util.*;
-
 public class Player extends Monster {
 
     // OBJECTS
@@ -127,12 +125,12 @@ public class Player extends Monster {
 
     // These set co-ordinates.
     public void setPosX(int x) { posX = x; }
-    public void setPosY(int y) { posY = y;}
+    public void setPosY(int y) { posY = y; }
 
     // These set stats as part of character creation.
-    public void setStrength(int strength) { this.strength = strength; }
-    public void setConstitution(int constitution) { this.constitution = constitution; }
-    public void setDexterity(int dexterity) { this.dexterity = dexterity; }
+    public void setStrength(int n) { strength = n; }
+    public void setConstitution(int n) { constitution = n; }
+    public void setDexterity(int n) { dexterity = n; }
 
     // These set healing potion values.
     public void setHealPotionsOne(int healPotionsOne) {
@@ -162,9 +160,9 @@ public class Player extends Monster {
     public void setTotalPotions() { totalPotions = healPotionsOne + healPotionsTwo + healPotionsThree + healPotionsFour; }
 
     // These set equipment based on supplied itemIDs.
-    public void setEquippedSword(double equippedSword) { this.equippedSword = equippedSword; }
-    public void setEquippedShield(double equippedShield) { this.equippedShield = equippedShield; }
-    public void setEquippedArmor(double equippedArmor) { this.equippedArmor = equippedArmor; }
+    public void setEquippedSword(double itemID) { equippedSword = itemID; }
+    public void setEquippedShield(double itemID) { equippedShield = itemID; }
+    public void setEquippedArmor(double itemID) { equippedArmor = itemID; }
 
     // These set combat math stats.
     public void setFinalAC() { this.finalAC = armorBaseAC + shieldBaseAC + armorBonus + shieldBonus; }
@@ -174,57 +172,42 @@ public class Player extends Monster {
     public void setMaxHPLoad(int maxHP) { this.maxHP = maxHP; }
 
     // This references a monsterID to determine, set, and display a dungeon completion.
-    public void setDungeonClear(double monsterID) {
+    public String setDungeonClear(double monsterID) {
         int i = (int)monsterID;
         double d = monsterID - i;
         d = (double) Math.round(d * 10) / 10;
+        String s = "";
         if (i == 0) {
             if (d == 0.1) {
                 setColdDungeonClear(true);
-                System.out.println("You have cleared the frozen dungeon!");
+                s = "You have cleared the frozen dungeon!";
             } else if (d == 0.2) {
                 setTropicalDungeonClear(true);
-                System.out.println("You have cleared the jungle dungeon!");
+                s = "You have cleared the jungle dungeon!";
             } else if (d == 0.3) {
                 setPlainsDungeonClear(true);
-                System.out.println("You have cleared the plains dungeon!");
+                s = "You have cleared the plains dungeon!";
             } else if (d == 0.4) {
                 setShoresDungeonClear(true);
-                System.out.println("You have cleared the shores dungeon!");
+                s = "You have cleared the shores dungeon!";
             } else {
                 setMountainDungeonClear(true);
-                System.out.println("You have cleared the mountain dungeon!");
+                s = "You have cleared the mountain dungeon!";
             }
         }
+        return s;
     }
 
     // These set player dungeon completion stats.
-    public void setPlainsDungeonClear(boolean plainsDungeonClear) { this.plainsDungeonClear = plainsDungeonClear; }
-    public void setColdDungeonClear(boolean coldDungeonClear) { this.coldDungeonClear = coldDungeonClear; }
-    public void setMountainDungeonClear(boolean mountainDungeonClear) { this.mountainDungeonClear = mountainDungeonClear; }
-    public void setShoresDungeonClear(boolean shoresDungeonClear) { this.shoresDungeonClear = shoresDungeonClear; }
-    public void setTropicalDungeonClear(boolean tropicalDungeonClear) { this.tropicalDungeonClear = tropicalDungeonClear; }
+    public void setPlainsDungeonClear(boolean b) { plainsDungeonClear = b; }
+    public void setColdDungeonClear(boolean b) { coldDungeonClear = b; }
+    public void setMountainDungeonClear(boolean b) { mountainDungeonClear = b; }
+    public void setShoresDungeonClear(boolean b) { shoresDungeonClear = b; }
+    public void setTropicalDungeonClear(boolean b) { tropicalDungeonClear = b; }
 
     // These set player tower completion stats.
-    public void setTowerOneClear(boolean towerOneClear) { this.towerOneClear = towerOneClear; }
-    public void setTowerTwoClear(boolean towerTwoClear) { this.towerTwoClear = towerTwoClear; }
-
-    // Called at the end of movement.
-    public void setBiome() {
-        if (posY > 5) {
-            posZ = 1;
-        } else if (posY < -5) {
-            posZ = 2;
-        } else if (posY == 0 && posX == 0) {
-            posZ = 0;
-        } else if (posX == -3) {
-            posZ = 4;
-        } else if (posX == 3) {
-            posZ = 5;
-        } else {
-            posZ = 3;
-        }
-    }
+    public void setTowerOneClear(boolean b) { towerOneClear = b; }
+    public void setTowerTwoClear(boolean b) { towerTwoClear = b; }
 
     // This should only be called during character creation.
     public void setMainStats() {
@@ -357,7 +340,10 @@ public class Player extends Monster {
     }
 
     // IS/CHECKS
-    // This returns true if the player has enough experience to level up.
+    // Returns true if the player has cleared all the dungeons.
+    public boolean checkForTowerReady() { return plainsDungeonClear && coldDungeonClear && mountainDungeonClear && shoresDungeonClear && tropicalDungeonClear; }
+
+    // Returns true if the player has enough experience to level up.
     public boolean checkForLevelUp() {
         if (level >= difficulty.getMaxLevel()) {
             return false;
@@ -366,54 +352,47 @@ public class Player extends Monster {
         }
     }
 
-    // This returns true if the player can afford a supplied price item.
+    // Returns true if the player can afford a supplied price item.
     public boolean checkMoney(int price) {
         return !(price > money);
     }
 
     // This equips gear if the supplied itemID is better than what is equipped, then discards unused gear.
-    public void checkForEquipUpgrade(double itemID) {
+    public String checkForEquipUpgrade(double itemID) {
+        String s = "";
         int i = (int)itemID;
         double d = itemID - i;
         d = Math.round(d * 10);
         d = d / 10;
         if (i == 1) {
             if (d == getEquippedArmorBonus()) {
-                System.out.print("The " + item.getItemName(getEquippedArmorID()) + " you're using is better than the " + item.getItemName(itemID) + ".\n");
-                System.out.print("You discard the " + item.getItemName(itemID) + ".\n");
+                s = "The " + item.getItemName(getEquippedArmorID()) + " you're using is better than the " + item.getItemName(itemID) + ".\nYou discard the " + item.getItemName(itemID) + ".\n";
             } else if (d > getEquippedArmorBonus()) {
-                System.out.print("The " + item.getItemName(itemID) + " is better than the " + item.getItemName(getEquippedArmorID()) + " you're using.\n");
-                System.out.print("You equip the " + item.getItemName(itemID) + " and discard the " + item.getItemName(getEquippedArmorID()) + ".\n");
+                s = "The " + item.getItemName(itemID) + " is better than the " + item.getItemName(getEquippedArmorID()) + " you're using.\nYou equip the " + item.getItemName(itemID) + " and discard the " + item.getItemName(getEquippedArmorID()) + ".\n";
                 setEquippedArmor(itemID);
             } else {
-                System.out.print("The " + item.getItemName(getEquippedArmorID()) + " you're using is better than the " + item.getItemName(itemID) + ".\n");
-                System.out.print("You discard the " + item.getItemName(itemID) + ".\n");
+                s = "The " + item.getItemName(getEquippedArmorID()) + " you're using is better than the " + item.getItemName(itemID) + ".\nYou discard the " + item.getItemName(itemID) + ".\n";
             }
         } else if (i == 2) {
             if (d == getEquippedSwordBonus()) {
-                System.out.print("The " + item.getItemName(getEquippedSwordID()) + " you're using is better than the " + item.getItemName(itemID) + ".\n");
-                System.out.print("You discard the " + item.getItemName(itemID) + ".\n");
+                s = "The " + item.getItemName(getEquippedSwordID()) + " you're using is better than the " + item.getItemName(itemID) + ".\nYou discard the " + item.getItemName(itemID) + ".\n";
             } else if (d > getEquippedSwordBonus()) {
-                System.out.print("The " + item.getItemName(itemID) + " is better than the " + item.getItemName(getEquippedSwordID()) + " you're using.\n");
-                System.out.print("You equip the " + item.getItemName(itemID) + " and discard the " + item.getItemName(getEquippedSwordID()) + ".\n");
+                s = "The " + item.getItemName(itemID) + " is better than the " + item.getItemName(getEquippedSwordID()) + " you're using.\nYou equip the " + item.getItemName(itemID) + " and discard the " + item.getItemName(getEquippedSwordID()) + ".\n";
                 setEquippedSword(itemID);
             } else {
-                System.out.print("The " + item.getItemName(getEquippedSwordID()) + " you're using is better than the " + item.getItemName(itemID) + ".\n");
-                System.out.print("You discard the " + item.getItemName(itemID) + ".\n");
+                s = "The " + item.getItemName(getEquippedSwordID()) + " you're using is better than the " + item.getItemName(itemID) + ".\nYou discard the " + item.getItemName(itemID) + ".\n";
             }
         } else if (i == 3) {
             if (d == getEquippedShieldBonus()) {
-                System.out.print("The "  + item.getItemName(getEquippedShieldID()) + " you're using is better than the " + item.getItemName(itemID) + ".\n");
-                System.out.print("You discard the " + item.getItemName(itemID) + ".\n");
+                s = "The "  + item.getItemName(getEquippedShieldID()) + " you're using is better than the " + item.getItemName(itemID) + ".\nYou discard the " + item.getItemName(itemID) + ".\n";
             } else if (d > getEquippedShieldBonus()) {
-                System.out.print("The " + item.getItemName(itemID) + " is better than the " + item.getItemName(getEquippedShieldID()) + " you're using.\n");
-                System.out.print("You equip the " + item.getItemName(itemID) + " and discard your " + item.getItemName(getEquippedShieldID()) + ".\n");
+                s = "The " + item.getItemName(itemID) + " is better than the " + item.getItemName(getEquippedShieldID()) + " you're using.\nYou equip the " + item.getItemName(itemID) + " and discard your " + item.getItemName(getEquippedShieldID()) + ".\n";
                 setEquippedShield(itemID);
             } else {
-                System.out.print("The " + item.getItemName(getEquippedShieldID()) + "you're using is better than the " + item.getItemName(itemID) + ".\n");
-                System.out.print("You discard the " + item.getItemName(itemID) + ".\n");
+                s = "The " + item.getItemName(getEquippedShieldID()) + "you're using is better than the " + item.getItemName(itemID) + ".\nYou discard the " + item.getItemName(itemID) + ".\n";
             }
         }
+        return s;
     }
 
     // These return the (true/false) status of a given dungeon from the players stats.
