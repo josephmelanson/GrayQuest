@@ -3,7 +3,7 @@
 1.0
 
 ## USAGE
-Run GrayQuest.jar (requires Java 18 SDK runtime)
+Download and compile the code in your Java IDE of choice, create your own .jar file, or run the provided GrayQuest.jar (requires Java 18 SDK runtime - https://www.oracle.com/java/technologies/downloads/#jdk18)
 
 ## PREMISE
 GrayQuest game is a text-based adventure game written in Java. GrayQuest is the latest (April 2021) iteration of a project intended as a learning tool that makes learning new programming languages, and their structures, more relatable to someone with interest in game design and mechanics.
